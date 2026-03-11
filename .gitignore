@@ -1,1 +1,4 @@
-.build
+.build/
+.swiftpm/
+.DS_Store
+**/.DS_Store
