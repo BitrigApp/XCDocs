@@ -37,6 +37,20 @@ struct ClientIntegrationTests {
   }
 
   @Test
+  func kindFilteringWorksEndToEnd() async throws {
+    let response = try await client.search(
+      SearchRequest(
+        query: LiveEnvironment.searchQuery,
+        kinds: [.article],
+        maxResults: 5
+      )
+    )
+
+    #expect(!response.results.isEmpty)
+    #expect(response.results.allSatisfy { $0.kind == .article })
+  }
+
+  @Test
   func includeContentIsReflectedInMappedSearchResults() async throws {
     let withoutContent = try await client.search(
       SearchRequest(

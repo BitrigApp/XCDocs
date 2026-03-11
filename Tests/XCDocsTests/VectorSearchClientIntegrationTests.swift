@@ -25,6 +25,7 @@ struct VectorSearchClientIntegrationTests {
     let hits = try client.search(
       vector: vector,
       frameworks: [],
+      kinds: [],
       limit: 3,
       includeContent: false
     )
@@ -39,6 +40,7 @@ struct VectorSearchClientIntegrationTests {
     let hits = try client.search(
       vector: vector,
       frameworks: ["  \(LiveEnvironment.searchFramework)  ", "", "   "],
+      kinds: [],
       limit: 5,
       includeContent: false
     )
@@ -48,18 +50,36 @@ struct VectorSearchClientIntegrationTests {
   }
 
   @Test
+  func normalizesAndAppliesKindFilters() async throws {
+    let client = try makeClient()
+    let vector = try await LiveEnvironment.embeddingVector(for: LiveEnvironment.searchQuery)
+    let hits = try client.search(
+      vector: vector,
+      frameworks: [],
+      kinds: ["  article  ", "", "   "],
+      limit: 5,
+      includeContent: false
+    )
+
+    #expect(!hits.isEmpty)
+    #expect(hits.allSatisfy { $0.type == "article" })
+  }
+
+  @Test
   func includeContentControlsWhetherSearchResultsContainContent() async throws {
     let client = try makeClient()
     let vector = try await LiveEnvironment.embeddingVector(for: "swiftui color")
     let hitsWithoutContent = try client.search(
       vector: vector,
       frameworks: [],
+      kinds: [],
       limit: 5,
       includeContent: false
     )
     let hitsWithContent = try client.search(
       vector: vector,
       frameworks: [],
+      kinds: [],
       limit: 5,
       includeContent: true
     )
@@ -74,6 +94,7 @@ struct VectorSearchClientIntegrationTests {
     let hits = try client.search(
       vector: Data(),
       frameworks: [LiveEnvironment.searchFramework],
+      kinds: ["article"],
       limit: 0,
       includeContent: false
     )

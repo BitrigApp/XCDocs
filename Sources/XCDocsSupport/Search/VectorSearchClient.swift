@@ -25,12 +25,19 @@ package final class VectorSearchClient {
   package func search(
     vector: Data,
     frameworks: [String],
+    kinds: [String],
     limit: Int,
     includeContent: Bool
   ) throws -> [VectorSearchHit] {
     guard limit > 0 else { return [] }
 
-    let filters = try frameworkFilters(from: frameworks)
+    let filters = try makeFilters(
+      attributeName: "framework",
+      values: frameworks
+    ) + makeFilters(
+      attributeName: "type",
+      values: kinds
+    )
     var selectedAttributes = [
       try VSKAttributeObject.stringNamed("framework"),
       try VSKAttributeObject.stringNamed("type"),
@@ -94,21 +101,24 @@ package final class VectorSearchClient {
 
   // MARK: Private
 
-  private func frameworkFilters(from frameworks: [String]) throws -> [VSKFilterObject] {
-    let normalizedFrameworks =
-      frameworks
+  private func makeFilters(
+    attributeName: String,
+    values: [String]
+  ) throws -> [VSKFilterObject] {
+    let normalizedValues =
+      values
       .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
       .filter { !$0.isEmpty }
 
-    guard !normalizedFrameworks.isEmpty else {
+    guard !normalizedValues.isEmpty else {
       return []
     }
 
-    let attribute = try VSKAttributeObject.stringNamed("framework")
-    let disjunctiveFilters = try normalizedFrameworks.map { framework in
+    let attribute = try VSKAttributeObject.stringNamed(attributeName)
+    let disjunctiveFilters = try normalizedValues.map { value in
       try VSKDisjunctiveFilterObject(
         operatorRawValue: VSKFilterOperator.equals.rawValue,
-        value: VSKDatabaseValueObject(string: framework)
+        value: VSKDatabaseValueObject(string: value)
       )
     }
 

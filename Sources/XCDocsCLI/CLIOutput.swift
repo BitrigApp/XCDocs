@@ -29,7 +29,7 @@ func printSearchResponse(_ response: SearchResponse) {
       : "nan"
     print("\(index + 1). [\(renderedScore)] \(result.identifier)")
 
-    let metadata = [result.framework, result.kind, result.title]
+    let metadata = [result.framework, result.kind?.rawValue, result.title]
       .compactMap { $0 }
       .joined(separator: " | ")
     if !metadata.isEmpty {

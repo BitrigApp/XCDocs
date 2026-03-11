@@ -28,6 +28,7 @@ Search for documentation:
 ```bash
 swift run xcdocs search "swift testing"
 swift run xcdocs search "swift testing" --framework "Swift Testing" --limit 5
+swift run xcdocs search "swift testing" --kind article --limit 5
 swift run xcdocs search "swiftui color" --json
 swift run xcdocs search "swiftui color" --omit-content
 ```
@@ -50,6 +51,7 @@ let searchResponse = try await client.search(
     SearchRequest(
         query: "swift testing",
         frameworks: ["Swift Testing"],
+        kinds: [.article],
         maxResults: 5,
         includeContent: true
     )

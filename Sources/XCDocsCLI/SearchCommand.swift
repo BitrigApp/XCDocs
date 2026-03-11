@@ -2,6 +2,8 @@ import ArgumentParser
 import Foundation
 import XCDocs
 
+extension DocumentationKind: ExpressibleByArgument {}
+
 struct SearchCommand: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "search",
@@ -14,6 +16,12 @@ struct SearchCommand: AsyncParsableCommand {
   @Option(
     name: .customLong("framework"), help: "Restrict results to a framework. Repeat to add more.")
   var frameworks: [String] = []
+
+  @Option(
+    name: .customLong("kind"),
+    help: "Restrict results to a documentation kind like article, symbol, or topic. Repeat to add more."
+  )
+  var kinds: [DocumentationKind] = []
 
   @Option(help: "Maximum number of results to return.")
   var limit = 10
@@ -36,6 +44,7 @@ struct SearchCommand: AsyncParsableCommand {
       SearchRequest(
         query: queryParts.joined(separator: " "),
         frameworks: frameworks,
+        kinds: kinds,
         maxResults: limit,
         includeContent: !omitContent
       )

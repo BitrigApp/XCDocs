@@ -21,7 +21,8 @@ public struct Client {
   /// requested.
   ///
   /// - Parameter request: The search parameters, including the query text, result limit,
-  ///   optional framework filters, and whether to include full document contents.
+  ///   optional framework and kind filters, and whether to include full document
+  ///   contents.
   /// - Returns: A search response containing the original query and the ranked results.
   /// - Throws: An error if the local documentation asset cannot be found, if embedding
   ///   generation fails, or if the vector search backend returns an error.
@@ -37,6 +38,7 @@ public struct Client {
     let hits = try searchClient.search(
       vector: vector,
       frameworks: request.frameworks,
+      kinds: request.kinds.map(\.rawValue),
       limit: request.maxResults,
       includeContent: request.includeContent
     )
@@ -48,7 +50,7 @@ public struct Client {
           identifier: $0.identifier,
           score: $0.score,
           framework: $0.framework,
-          kind: $0.type,
+          kind: $0.type.flatMap(DocumentationKind.init(rawValue:)),
           title: $0.title,
           content: $0.content
         )
@@ -85,7 +87,7 @@ public struct Client {
       result: FetchResult(
         identifier: result.identifier,
         framework: result.framework,
-        kind: result.type,
+        kind: result.type.flatMap(DocumentationKind.init(rawValue:)),
         title: result.title,
         content: result.content
       )

@@ -14,7 +14,7 @@ public struct SearchResult: Codable, Hashable, Sendable {
   public let framework: String?
 
   /// The entry kind reported by the documentation database, if known.
-  public let kind: String?
+  public let kind: DocumentationKind?
 
   /// The display title for the result, if present.
   public let title: String?
@@ -35,7 +35,7 @@ public struct SearchResult: Codable, Hashable, Sendable {
     identifier: String,
     score: Double,
     framework: String?,
-    kind: String?,
+    kind: DocumentationKind?,
     title: String?,
     content: String?
   ) {

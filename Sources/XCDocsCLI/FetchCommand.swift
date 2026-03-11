@@ -30,7 +30,7 @@ struct FetchCommand: AsyncParsableCommand {
 private func printFetchResponse(_ response: FetchResponse) {
   print(response.result.identifier)
 
-  let metadata = [response.result.framework, response.result.kind, response.result.title]
+  let metadata = [response.result.framework, response.result.kind?.rawValue, response.result.title]
     .compactMap { $0 }
     .joined(separator: " | ")
   if !metadata.isEmpty {

@@ -9,20 +9,24 @@ struct ModelTests {
     let original = SearchRequest(query: "swift testing")
     var copy = original
     copy.frameworks = ["Swift Testing"]
+    copy.kinds = [.article]
     copy.maxResults = 3
     copy.includeContent = true
 
     #expect(original.frameworks.isEmpty)
+    #expect(original.kinds.isEmpty)
     #expect(original.maxResults == 10)
     #expect(original.includeContent == false)
   }
 
   @Test
   func publicModelsRoundTripThroughCodable() throws {
+    try assertRoundTrip(DocumentationKind.article)
     try assertRoundTrip(
       SearchRequest(
         query: "swift testing",
         frameworks: ["Swift Testing"],
+        kinds: [.article],
         maxResults: 5,
         includeContent: true
       )
@@ -32,7 +36,7 @@ struct ModelTests {
         identifier: "/documentation/Testing",
         score: 0.75,
         framework: "Swift Testing",
-        kind: "article",
+        kind: .article,
         title: "Swift Testing",
         content: "Create and run tests."
       )
@@ -45,7 +49,7 @@ struct ModelTests {
             identifier: "/documentation/Testing",
             score: 0.75,
             framework: "Swift Testing",
-            kind: "article",
+            kind: .article,
             title: "Swift Testing",
             content: "Create and run tests."
           )
@@ -57,7 +61,7 @@ struct ModelTests {
       FetchResult(
         identifier: "/documentation/Testing",
         framework: "Swift Testing",
-        kind: "article",
+        kind: .article,
         title: "Swift Testing",
         content: "Create and run tests."
       )
@@ -67,7 +71,7 @@ struct ModelTests {
         result: FetchResult(
           identifier: "/documentation/Testing",
           framework: "Swift Testing",
-          kind: "article",
+          kind: .article,
           title: "Swift Testing",
           content: "Create and run tests."
         )

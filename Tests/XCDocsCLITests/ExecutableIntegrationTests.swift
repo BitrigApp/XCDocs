@@ -51,6 +51,24 @@ struct ExecutableLiveIntegrationTests {
   }
 
   @Test
+  func searchAcceptsKindFilters() async throws {
+    let result = try await ProcessRunner.runXCDocs([
+      "search",
+      LiveEnvironment.searchQuery,
+      "--framework",
+      LiveEnvironment.searchFramework,
+      "--kind",
+      "article",
+      "--limit",
+      "3",
+      "--omit-content",
+    ])
+
+    #expect(result.exitStatus == 0)
+    #expect(result.stdout.contains("article"))
+  }
+
+  @Test
   func fetchJSONContainsTheExpectedResultShape() async throws {
     let result = try await ProcessRunner.runXCDocs([
       "fetch",

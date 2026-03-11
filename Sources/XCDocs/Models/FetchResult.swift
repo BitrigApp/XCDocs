@@ -9,10 +9,7 @@ public struct FetchResult: Codable, Hashable, Sendable {
   public let framework: String?
 
   /// The entry kind reported by the documentation database, if known.
-  ///
-  /// Typical values include things like `article`, `struct`, `method`, or other
-  /// documentation-specific classifications.
-  public let kind: String?
+  public let kind: DocumentationKind?
 
   /// The display title for the entry, if present.
   public let title: String?
@@ -31,7 +28,7 @@ public struct FetchResult: Codable, Hashable, Sendable {
   public init(
     identifier: String,
     framework: String?,
-    kind: String?,
+    kind: DocumentationKind?,
     title: String?,
     content: String?
   ) {
