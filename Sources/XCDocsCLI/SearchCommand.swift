@@ -19,7 +19,8 @@ struct SearchCommand: AsyncParsableCommand {
 
   @Option(
     name: .customLong("kind"),
-    help: "Restrict results to a documentation kind like article, symbol, or topic. Repeat to add more."
+    help:
+      "Restrict results to a documentation kind like article, symbol, or topic. Repeat to add more."
   )
   var kinds: [DocumentationKind] = []
 

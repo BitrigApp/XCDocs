@@ -31,13 +31,15 @@ package final class VectorSearchClient {
   ) throws -> [VectorSearchHit] {
     guard limit > 0 else { return [] }
 
-    let filters = try makeFilters(
-      attributeName: "framework",
-      values: frameworks
-    ) + makeFilters(
-      attributeName: "type",
-      values: kinds
-    )
+    let filters =
+      try makeFilters(
+        attributeName: "framework",
+        values: frameworks
+      )
+      + makeFilters(
+        attributeName: "type",
+        values: kinds
+      )
     var selectedAttributes = [
       try VSKAttributeObject.stringNamed("framework"),
       try VSKAttributeObject.stringNamed("type"),
