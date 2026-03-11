@@ -1,0 +1,51 @@
+name: Format
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Package.swift"
+      - "Sources/**"
+      - "Tests/**"
+      - ".github/workflows/format.yml"
+  pull_request:
+    paths:
+      - "Package.swift"
+      - "Sources/**"
+      - "Tests/**"
+      - ".github/workflows/format.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  swiftfmt:
+    name: Swift Format
+    runs-on: ubuntu-latest
+    env:
+      SWIFT_VERSION: "6.2"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Swift Toolchain
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.tool_cache }}/swift-Ubuntu/${{ env.SWIFT_VERSION }}*/*
+          key: ${{ runner.os }}-${{ runner.arch }}-swift-toolchain-${{ env.SWIFT_VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-swift-toolchain-
+
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: ${{ env.SWIFT_VERSION }}
+
+      - name: Verify Swift Toolchain
+        run: swift --version
+
+      - name: Lint
+        run: |
+          swift format lint --strict Package.swift
+          swift format lint --strict --recursive Sources Tests
