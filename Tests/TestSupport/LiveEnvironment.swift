@@ -64,7 +64,7 @@ package enum LiveEnvironment {
         }
 
         var result = Data(capacity: expectedCount * MemoryLayout<Float>.size)
-        float16Data.withUnsafeBytes { rawBuffer in
+        float16Data.withUnsafeBytes { (rawBuffer: UnsafeRawBufferPointer) in
             let halfValues = rawBuffer.bindMemory(to: UInt16.self)
             for bits in halfValues {
                 var floatValue = Float(Float16(bitPattern: bits))
