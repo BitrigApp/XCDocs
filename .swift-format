@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "indentation": {
+    "spaces": 4
+  },
+  "lineLength": 10000,
+  "lineBreakBeforeEachArgument": false,
+  "respectsExistingLineBreaks": false,
+  "spacesBeforeEndOfLineComments": 1,
+  "indentConditionalCompilationBlocks": false,
+  "rules": {
+    "NoAccessLevelOnExtensionDeclaration": true,
+    "OmitExplicitReturns": true,
+    "UseWhereClausesInForLoops": true
+  }
+}
