@@ -1,8 +1,7 @@
 import Foundation
 
 /// A ranked documentation result returned from `Client.search`.
-@available(macOS 26, *)
-public struct SearchResult: Codable, Hashable, Sendable {
+@available(macOS 26, *) public struct SearchResult: Codable, Hashable, Sendable {
     /// The stable documentation identifier for the result.
     public let identifier: String
 

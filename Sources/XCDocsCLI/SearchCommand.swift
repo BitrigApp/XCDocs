@@ -4,8 +4,7 @@ import XCDocs
 
 extension DocumentationKind: ExpressibleByArgument {}
 
-@available(macOS 26, *)
-struct SearchCommand: AsyncParsableCommand {
+@available(macOS 26, *) struct SearchCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(commandName: "search", abstract: "Search the documentation asset.")
 
     @Argument(help: "The search query.") var queryParts: [String] = []

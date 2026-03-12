@@ -2,8 +2,7 @@ import ArgumentParser
 import Foundation
 import XCDocs
 
-@available(macOS 26, *)
-struct FetchCommand: AsyncParsableCommand {
+@available(macOS 26, *) struct FetchCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "fetch",
         abstract: "Fetch a documentation entry by identifier."
