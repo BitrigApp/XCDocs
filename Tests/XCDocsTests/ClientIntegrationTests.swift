@@ -5,7 +5,8 @@ import XCDocs
 
 @testable import XCDocsBridge
 
-@Suite("XCDocs Client Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized) struct ClientIntegrationTests {
+@Suite("XCDocs Client Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized)
+struct ClientIntegrationTests {
     private let client = Client()
 
     @Test func searchReturnsResultsForALiveQuery() async throws {
@@ -15,7 +16,11 @@ import XCDocs
     }
 
     @Test func frameworkFilteringWorksEndToEnd() async throws {
-        let results = try await client.search(LiveEnvironment.searchQuery, frameworks: [LiveEnvironment.searchFramework], maxResults: 5)
+        let results = try await client.search(
+            LiveEnvironment.searchQuery,
+            frameworks: [LiveEnvironment.searchFramework],
+            maxResults: 5
+        )
 
         #expect(!results.isEmpty)
         #expect(results.allSatisfy { $0.framework == LiveEnvironment.searchFramework })

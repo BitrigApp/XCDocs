@@ -5,8 +5,25 @@ import XCDocs
 @Suite("XCDocs Models") struct ModelTests {
     @Test func publicModelsRoundTripThroughCodable() throws {
         try assertRoundTrip(DocumentationKind.article)
-        try assertRoundTrip(SearchResult(identifier: "/documentation/Testing", score: 0.75, framework: "Swift Testing", kind: .article, title: "Swift Testing", content: "Create and run tests."))
-        try assertRoundTrip(FetchResult(identifier: "/documentation/Testing", framework: "Swift Testing", kind: .article, title: "Swift Testing", content: "Create and run tests."))
+        try assertRoundTrip(
+            SearchResult(
+                identifier: "/documentation/Testing",
+                score: 0.75,
+                framework: "Swift Testing",
+                kind: .article,
+                title: "Swift Testing",
+                content: "Create and run tests."
+            )
+        )
+        try assertRoundTrip(
+            FetchResult(
+                identifier: "/documentation/Testing",
+                framework: "Swift Testing",
+                kind: .article,
+                title: "Swift Testing",
+                content: "Create and run tests."
+            )
+        )
     }
 }
 

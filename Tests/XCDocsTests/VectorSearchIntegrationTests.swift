@@ -3,7 +3,8 @@ import Testing
 
 @testable import XCDocsBridge
 
-@Suite("VectorSearch Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized) struct VectorSearchIntegrationTests {
+@Suite("VectorSearch Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized)
+struct VectorSearchIntegrationTests {
     @Test func initializesConfigAndClientAgainstTheLiveDatabase() throws {
         let databaseDirectoryURL = try LiveEnvironment.databaseDirectoryURL()
         let config = try VSKConfigObject(baseDirectoryURL: databaseDirectoryURL, numberOfProbes: 8, readOnly: true)
@@ -17,7 +18,12 @@ import Testing
         let client = try VSKClientObject(config: config)
         let attributes = try [VSKAttributeObject.stringNamed("framework"), VSKAttributeObject.stringNamed("title")]
 
-        let assets = try client.stringIdentifiedAssets(identifiers: [LiveEnvironment.documentationIdentifier], attributeFilters: [], includeVectors: false, selectAttributes: attributes)
+        let assets = try client.stringIdentifiedAssets(
+            identifiers: [LiveEnvironment.documentationIdentifier],
+            attributeFilters: [],
+            includeVectors: false,
+            selectAttributes: attributes
+        )
 
         let asset = try #require(assets.first)
         #expect(asset.stringIdentifier == LiveEnvironment.documentationIdentifier)

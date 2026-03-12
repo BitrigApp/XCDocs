@@ -11,5 +11,7 @@ package struct MADTextEmbeddingRequestObject: PrivateObject {
         self.base = cls.init()
     }
 
-    package var embeddingResults: [MADTextEmbeddingResultObject] { array(forKey: .embeddingResults).map(MADTextEmbeddingResultObject.init(base:)) }
+    package var embeddingResults: [MADTextEmbeddingResultObject] {
+        array(forKey: .embeddingResults).map(MADTextEmbeddingResultObject.init(base:))
+    }
 }

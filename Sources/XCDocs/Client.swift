@@ -29,15 +29,36 @@ public struct Client {
     /// - Returns: The ranked documentation search results.
     /// - Throws: An error if the local documentation asset cannot be found, if embedding
     ///   generation fails, or if the vector search backend returns an error.
-    public func search(_ query: String, frameworks: [String] = [], kinds: [DocumentationKind] = [], maxResults: Int = 10, includeContent: Bool = false) async throws -> [SearchResult] {
+    public func search(
+        _ query: String,
+        frameworks: [String] = [],
+        kinds: [DocumentationKind] = [],
+        maxResults: Int = 10,
+        includeContent: Bool = false
+    ) async throws -> [SearchResult] {
         let databaseDirectoryURL = try DocumentationAssetLocator().locateDatabaseDirectoryURL()
         let vector = try await embeddingVector(for: query)
 
         let searchClient = try VectorSearchClient(databaseDirectoryURL: databaseDirectoryURL, readOnly: true)
 
-        let hits = try searchClient.search(vector: vector, frameworks: frameworks, kinds: kinds.map(\.rawValue), limit: maxResults, includeContent: includeContent)
+        let hits = try searchClient.search(
+            vector: vector,
+            frameworks: frameworks,
+            kinds: kinds.map(\.rawValue),
+            limit: maxResults,
+            includeContent: includeContent
+        )
 
-        return hits.map { SearchResult(identifier: $0.identifier, score: $0.score, framework: $0.framework, kind: $0.type.flatMap(DocumentationKind.init(rawValue:)), title: $0.title, content: $0.content) }
+        return hits.map {
+            SearchResult(
+                identifier: $0.identifier,
+                score: $0.score,
+                framework: $0.framework,
+                kind: $0.type.flatMap(DocumentationKind.init(rawValue:)),
+                title: $0.title,
+                content: $0.content
+            )
+        }
     }
 
     /// Fetches a single documentation entry by its stable documentation identifier.
@@ -55,9 +76,17 @@ public struct Client {
 
         let searchClient = try VectorSearchClient(databaseDirectoryURL: databaseDirectoryURL, readOnly: true)
 
-        guard let result = try searchClient.fetch(identifier: identifier) else { throw BridgeError(.assetNotFound, "No documentation entry was found for \(identifier)") }
+        guard let result = try searchClient.fetch(identifier: identifier) else {
+            throw BridgeError(.assetNotFound, "No documentation entry was found for \(identifier)")
+        }
 
-        return FetchResult(identifier: result.identifier, framework: result.framework, kind: result.type.flatMap(DocumentationKind.init(rawValue:)), title: result.title, content: result.content)
+        return FetchResult(
+            identifier: result.identifier,
+            framework: result.framework,
+            kind: result.type.flatMap(DocumentationKind.init(rawValue:)),
+            title: result.title,
+            content: result.content
+        )
     }
 
     // MARK: Private
@@ -71,18 +100,34 @@ public struct Client {
             let completionHandler: @convention(block) () -> Void = { continuation.resume() }
             let completionHandlerObject = completionHandler as AnyObject
 
-            do { try runCatchingExceptions { _ = try service.performRequests(requests: [request], textInputs: [textInput], completionHandler: completionHandlerObject) } } catch { continuation.resume(throwing: error) }
+            do {
+                try runCatchingExceptions {
+                    _ = try service.performRequests(
+                        requests: [request],
+                        textInputs: [textInput],
+                        completionHandler: completionHandlerObject
+                    )
+                }
+            } catch { continuation.resume(throwing: error) }
         }
 
-        guard let result = request.embeddingResults.first, !result.embeddingData.isEmpty else { throw BridgeError(.operationFailed, "MediaAnalysisServices completed without returning embedding data.") }
+        guard let result = request.embeddingResults.first, !result.embeddingData.isEmpty else {
+            throw BridgeError(.operationFailed, "MediaAnalysisServices completed without returning embedding data.")
+        }
 
-        let elementCount = result.elementCount > 0 ? result.elementCount : result.embeddingData.count / MemoryLayout<UInt16>.size
+        let elementCount =
+            result.elementCount > 0 ? result.elementCount : result.embeddingData.count / MemoryLayout<UInt16>.size
         return try makeFloat32Data(from: result.embeddingData, expectedCount: elementCount)
     }
 
     private func makeFloat32Data(from float16Data: Data, expectedCount: Int) throws -> Data {
         let resolvedCount = float16Data.count / MemoryLayout<UInt16>.size
-        guard resolvedCount == expectedCount else { throw BridgeError(.invalidEmbedding, "Embedding element count mismatch: expected \(expectedCount), got \(resolvedCount)") }
+        guard resolvedCount == expectedCount else {
+            throw BridgeError(
+                .invalidEmbedding,
+                "Embedding element count mismatch: expected \(expectedCount), got \(resolvedCount)"
+            )
+        }
 
         var result = Data(capacity: expectedCount * MemoryLayout<Float>.size)
         float16Data.withUnsafeBytes { rawBuffer in

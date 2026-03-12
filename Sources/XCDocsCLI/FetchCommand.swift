@@ -3,7 +3,10 @@ import Foundation
 import XCDocs
 
 struct FetchCommand: AsyncParsableCommand {
-    static let configuration = CommandConfiguration(commandName: "fetch", abstract: "Fetch a documentation entry by identifier.")
+    static let configuration = CommandConfiguration(
+        commandName: "fetch",
+        abstract: "Fetch a documentation entry by identifier."
+    )
 
     @Argument(help: "The documentation identifier, for example /documentation/SwiftUI/List.") var identifier: String
 

@@ -3,7 +3,8 @@ import Testing
 
 @testable import XCDocsBridge
 
-@Suite("Framework and Service Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized) struct FrameworkAndServiceIntegrationTests {
+@Suite("Framework and Service Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized)
+struct FrameworkAndServiceIntegrationTests {
     @Test func loadsPrivateFrameworksIdempotently() throws {
         let firstMediaAnalysisBundle = try FrameworkLoader.loadMediaAnalysisServices()
         let secondMediaAnalysisBundle = try FrameworkLoader.loadMediaAnalysisServices()

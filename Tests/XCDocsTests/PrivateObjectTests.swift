@@ -32,7 +32,9 @@ import Testing
         let classSelector = NSSelectorFromString("classAnswer")
 
         let instanceMethod = try #require(wrapper.objcInstanceMethod(selector: instanceSelector, as: NumberGetter.self))
-        let classMethod = try #require(FixtureWrapper.objcClassMethod(KeyValueFixture.self, selector: classSelector, as: ClassNumberGetter.self))
+        let classMethod = try #require(
+            FixtureWrapper.objcClassMethod(KeyValueFixture.self, selector: classSelector, as: ClassNumberGetter.self)
+        )
 
         #expect(instanceMethod(fixture, instanceSelector)?.intValue == 42)
         #expect(classMethod(KeyValueFixture.self, classSelector)?.intValue == 7)

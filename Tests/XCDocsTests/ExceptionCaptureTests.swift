@@ -9,7 +9,9 @@ import Testing
     }
 
     @Test func convertsRaisedExceptionsIntoNSError() throws {
-        let error = XCDocsCatchException { NSException(name: .invalidArgumentException, reason: "boom", userInfo: nil).raise() }
+        let error = XCDocsCatchException {
+            NSException(name: .invalidArgumentException, reason: "boom", userInfo: nil).raise()
+        }
 
         let nsError = try #require(error as NSError?)
         #expect(nsError.domain == "ExceptionCatcherObjC.Exception")
@@ -17,7 +19,9 @@ import Testing
     }
 
     @Test func preservesExceptionNameAndReasonMetadata() throws {
-        let error = XCDocsCatchException { NSException(name: .invalidArgumentException, reason: "bad argument", userInfo: nil).raise() }
+        let error = XCDocsCatchException {
+            NSException(name: .invalidArgumentException, reason: "bad argument", userInfo: nil).raise()
+        }
 
         let nsError = try #require(error as NSError?)
         #expect(nsError.userInfo[NSLocalizedDescriptionKey] as? String == "bad argument")

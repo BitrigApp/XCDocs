@@ -17,7 +17,13 @@ import Testing
     }
 
     @Test func wrapsObjectiveCExceptionsAsBridgeErrors() throws {
-        let error = try #require(captureBridgeError { try runCatchingExceptions { NSException(name: .invalidArgumentException, reason: "boom", userInfo: nil).raise() } })
+        let error = try #require(
+            captureBridgeError {
+                try runCatchingExceptions {
+                    NSException(name: .invalidArgumentException, reason: "boom", userInfo: nil).raise()
+                }
+            }
+        )
 
         #expect(error.code == .operationFailed)
         #expect(error.message == "Objective-C exception while calling MediaAnalysisServices.")
@@ -25,7 +31,13 @@ import Testing
     }
 
     @Test func mapsNilPathArgumentExceptionsToBootstrapMessage() throws {
-        let error = try #require(captureBridgeError { try runCatchingExceptions { NSException(name: .invalidArgumentException, reason: "nil path argument", userInfo: nil).raise() } })
+        let error = try #require(
+            captureBridgeError {
+                try runCatchingExceptions {
+                    NSException(name: .invalidArgumentException, reason: "nil path argument", userInfo: nil).raise()
+                }
+            }
+        )
 
         #expect(error.code == .operationFailed)
         #expect(error.message == "MediaAnalysisServices failed to bootstrap its XPC connection.")

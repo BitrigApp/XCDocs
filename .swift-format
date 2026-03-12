@@ -3,14 +3,29 @@
   "indentation": {
     "spaces": 4
   },
-  "lineLength": 10000,
-  "lineBreakBeforeEachArgument": false,
+  "lineLength": 120,
+  "lineBreakBeforeEachArgument": true,
   "respectsExistingLineBreaks": false,
   "spacesBeforeEndOfLineComments": 1,
   "indentConditionalCompilationBlocks": false,
   "rules": {
+    "AllPublicDeclarationsHaveDocumentation": true,
+    "AlwaysUseLiteralForEmptyCollectionInit": true,
+    "AlwaysUseLowerCamelCase": true,
+    "DoNotUseSemicolons": true,
+    "DontRepeatTypeInStaticProperties": true,
+    "FileScopedDeclarationPrivacy": true,
     "NoAccessLevelOnExtensionDeclaration": true,
+    "NoEmptyTrailingClosureParentheses": true,
+    "NoLeadingUnderscores": true,
+    "NoParensAroundConditions": true,
     "OmitExplicitReturns": true,
-    "UseWhereClausesInForLoops": true
+    "TypeNamesShouldBeCapitalized": true,
+    "UseExplicitNilCheckInConditions": true,
+    "UseLetInEveryBoundCaseVariable": true,
+    "UseSingleLinePropertyGetter": true,
+    "UseSynthesizedInitializer": true,
+    "UseWhereClausesInForLoops": true,
+    "ValidateDocumentationComments": true
   }
 }

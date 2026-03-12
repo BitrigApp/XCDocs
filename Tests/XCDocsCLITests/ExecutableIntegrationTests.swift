@@ -21,9 +21,13 @@ import Testing
     }
 }
 
-@Suite("xcdocs Executable Live Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized) struct ExecutableLiveIntegrationTests {
+@Suite("xcdocs Executable Live Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized)
+struct ExecutableLiveIntegrationTests {
     @Test func searchJSONMatchesTheExpectedMCPShape() async throws {
-        let result = try await ProcessRunner.runXCDocs(["search", LiveEnvironment.searchQuery, "--framework", LiveEnvironment.searchFramework, "--limit", "3", "--json"])
+        let result = try await ProcessRunner.runXCDocs([
+            "search", LiveEnvironment.searchQuery, "--framework", LiveEnvironment.searchFramework, "--limit", "3",
+            "--json",
+        ])
 
         let json = try dictionaryJSON(from: result.stdout)
         let documents = try #require(json["documents"] as? [[String: Any]])
@@ -38,7 +42,10 @@ import Testing
     }
 
     @Test func searchAcceptsKindFilters() async throws {
-        let result = try await ProcessRunner.runXCDocs(["search", LiveEnvironment.searchQuery, "--framework", LiveEnvironment.searchFramework, "--kind", "article", "--limit", "3", "--omit-content"])
+        let result = try await ProcessRunner.runXCDocs([
+            "search", LiveEnvironment.searchQuery, "--framework", LiveEnvironment.searchFramework, "--kind", "article",
+            "--limit", "3", "--omit-content",
+        ])
 
         #expect(result.exitStatus == 0)
         #expect(result.stdout.contains("article"))
@@ -59,7 +66,11 @@ import Testing
         let result = try await ProcessRunner.runXCDocs(["fetch", "/documentation/DefinitelyNotReal"])
 
         #expect(result.exitStatus == 1)
-        #expect(result.combinedOutput.contains("[assetNotFound] No documentation entry was found for /documentation/DefinitelyNotReal"))
+        #expect(
+            result.combinedOutput.contains(
+                "[assetNotFound] No documentation entry was found for /documentation/DefinitelyNotReal"
+            )
+        )
     }
 }
 

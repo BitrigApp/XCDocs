@@ -31,7 +31,14 @@ public struct SearchResult: Codable, Hashable, Sendable {
     ///   - kind: The entry classification reported by the documentation asset, if known.
     ///   - title: The display title for the result, if present.
     ///   - content: The entry content, if requested and available.
-    public init(identifier: String, score: Double, framework: String?, kind: DocumentationKind?, title: String?, content: String?) {
+    public init(
+        identifier: String,
+        score: Double,
+        framework: String?,
+        kind: DocumentationKind?,
+        title: String?,
+        content: String?
+    ) {
         self.identifier = identifier
         self.score = score
         self.framework = framework

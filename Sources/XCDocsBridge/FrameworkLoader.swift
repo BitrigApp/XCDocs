@@ -9,14 +9,18 @@ enum FrameworkLoader {
     private static let vectorSearchBundle = Result { try loadBundle(at: vectorSearchPath) }
 
     @discardableResult private static func loadBundle(at path: String) throws -> Bundle {
-        guard let bundle = Bundle(path: path) else { throw BridgeError(.frameworkUnavailable, "Framework bundle missing at \(path)") }
+        guard let bundle = Bundle(path: path) else {
+            throw BridgeError(.frameworkUnavailable, "Framework bundle missing at \(path)")
+        }
 
         guard bundle.load() else { throw BridgeError(.frameworkUnavailable, "Failed to load framework at \(path)") }
 
         return bundle
     }
 
-    @discardableResult static func loadMediaAnalysisServices() throws -> Bundle { try mediaAnalysisServicesBundle.get() }
+    @discardableResult static func loadMediaAnalysisServices() throws -> Bundle {
+        try mediaAnalysisServicesBundle.get()
+    }
 
     @discardableResult static func loadVectorSearch() throws -> Bundle { try vectorSearchBundle.get() }
 }
