@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "XCDocs",
     platforms: [
-        .macOS(.v26),
+        .macOS(.v15),
     ],
     products: [
         .library(

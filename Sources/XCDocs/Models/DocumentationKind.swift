@@ -1,6 +1,7 @@
 import Foundation
 
 /// Known documentation kinds exposed by Apple's local documentation search index.
+@available(macOS 26, *)
 public enum DocumentationKind: String, Codable, CaseIterable, Hashable, Sendable {
     /// A narrative documentation page.
     case article
