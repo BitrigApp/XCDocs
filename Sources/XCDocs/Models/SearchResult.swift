@@ -1,6 +1,6 @@
 import Foundation
 
-/// A ranked documentation result returned from ``Client/search(_:)``.
+/// A ranked documentation result returned from `Client.search`.
 public struct SearchResult: Codable, Hashable, Sendable {
   /// The stable documentation identifier for the result.
   public let identifier: String

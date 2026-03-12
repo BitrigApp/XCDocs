@@ -41,26 +41,24 @@ struct SearchCommand: AsyncParsableCommand {
 
   mutating func run() async throws {
     let client = Client()
-    let response = try await client.search(
-      SearchRequest(
-        query: queryParts.joined(separator: " "),
-        frameworks: frameworks,
-        kinds: kinds,
-        maxResults: limit,
-        includeContent: !omitContent
-      )
+    let results = try await client.search(
+      queryParts.joined(separator: " "),
+      frameworks: frameworks,
+      kinds: kinds,
+      maxResults: limit,
+      includeContent: !omitContent
     )
 
     if json {
-      try printDocumentationSearchJSON(response)
+      try printDocumentationSearchJSON(results)
       return
     }
 
-    printSearchResponse(response)
+    printSearchResults(results)
   }
 }
 
-private func printDocumentationSearchJSON(_ response: SearchResponse) throws {
+private func printDocumentationSearchJSON(_ results: [SearchResult]) throws {
   struct DocumentationSearchDocument: Encodable {
     let contents: String
     let score: Double
@@ -78,10 +76,10 @@ private func printDocumentationSearchJSON(_ response: SearchResponse) throws {
   struct DocumentationSearchResponse: Encodable {
     let documents: [DocumentationSearchDocument]
 
-    init(searchResponse: SearchResponse) {
-      self.documents = searchResponse.results.map(DocumentationSearchDocument.init)
+    init(searchResults: [SearchResult]) {
+      self.documents = searchResults.map(DocumentationSearchDocument.init)
     }
   }
 
-  try printCompactJSON(DocumentationSearchResponse(searchResponse: response))
+  try printCompactJSON(DocumentationSearchResponse(searchResults: results))
 }

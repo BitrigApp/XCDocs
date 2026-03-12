@@ -21,8 +21,8 @@ func printCompactJSON<T: Encodable>(_ value: T) throws {
   print(string)
 }
 
-func printSearchResponse(_ response: SearchResponse) {
-  for (index, result) in response.results.enumerated() {
+func printSearchResults(_ results: [SearchResult]) {
+  for (index, result) in results.enumerated() {
     let renderedScore =
       result.score.isFinite
       ? String(format: "%.4f", result.score)

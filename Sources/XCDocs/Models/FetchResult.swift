@@ -1,6 +1,6 @@
 import Foundation
 
-/// A single documentation entry returned from ``Client/fetch(_:)``.
+/// A single documentation entry returned from `Client.fetch`.
 public struct FetchResult: Codable, Hashable, Sendable {
   /// The stable documentation identifier for the entry.
   public let identifier: String

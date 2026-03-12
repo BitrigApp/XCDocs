@@ -14,21 +14,30 @@ public struct Client {
 
   /// Runs a semantic documentation search against Apple's local documentation database.
   ///
-  /// The request's query text is embedded with Apple's local embedding service and then
+  /// The query text is embedded with Apple's local embedding service and then
   /// searched against the installed documentation vector index. The returned results may
   /// include optional metadata such as framework, kind, title, and content depending on
   /// what the underlying documentation asset contains and whether content retrieval was
   /// requested.
   ///
-  /// - Parameter request: The search parameters, including the query text, result limit,
-  ///   optional framework and kind filters, and whether to include full document
-  ///   contents.
-  /// - Returns: A search response containing the original query and the ranked results.
+  /// - Parameters:
+  ///   - query: The natural-language query text.
+  ///   - frameworks: Optional framework filters to constrain the search.
+  ///   - kinds: Optional kind filters to constrain the search.
+  ///   - maxResults: The maximum number of ranked matches to return.
+  ///   - includeContent: Whether to include full document contents in each result.
+  /// - Returns: The ranked documentation search results.
   /// - Throws: An error if the local documentation asset cannot be found, if embedding
   ///   generation fails, or if the vector search backend returns an error.
-  public func search(_ request: SearchRequest) async throws -> SearchResponse {
+  public func search(
+    _ query: String,
+    frameworks: [String] = [],
+    kinds: [DocumentationKind] = [],
+    maxResults: Int = 10,
+    includeContent: Bool = false
+  ) async throws -> [SearchResult] {
     let databaseDirectoryURL = try DocumentationAssetLocator().locateDatabaseDirectoryURL()
-    let vector = try await embeddingVector(for: request.query)
+    let vector = try await embeddingVector(for: query)
 
     let searchClient = try VectorSearchClient(
       databaseDirectoryURL: databaseDirectoryURL,
@@ -37,38 +46,35 @@ public struct Client {
 
     let hits = try searchClient.search(
       vector: vector,
-      frameworks: request.frameworks,
-      kinds: request.kinds.map(\.rawValue),
-      limit: request.maxResults,
-      includeContent: request.includeContent
+      frameworks: frameworks,
+      kinds: kinds.map(\.rawValue),
+      limit: maxResults,
+      includeContent: includeContent
     )
 
-    return SearchResponse(
-      query: request.query,
-      results: hits.map {
-        SearchResult(
-          identifier: $0.identifier,
-          score: $0.score,
-          framework: $0.framework,
-          kind: $0.type.flatMap(DocumentationKind.init(rawValue:)),
-          title: $0.title,
-          content: $0.content
-        )
-      }
-    )
+    return hits.map {
+      SearchResult(
+        identifier: $0.identifier,
+        score: $0.score,
+        framework: $0.framework,
+        kind: $0.type.flatMap(DocumentationKind.init(rawValue:)),
+        title: $0.title,
+        content: $0.content
+      )
+    }
   }
 
   /// Fetches a single documentation entry by its stable documentation identifier.
   ///
   /// Use this when you already know the exact identifier for an entry, such as a path like
-  /// `/documentation/SwiftUI/Color`. Unlike ``search(_:)``, this does not generate an
-  /// embedding or run a semantic ranking step.
+  /// `/documentation/SwiftUI/Color`. Unlike `search(_:frameworks:kinds:maxResults:includeContent:)`,
+  /// this does not generate an embedding or run a semantic ranking step.
   ///
-  /// - Parameter request: The identifier to resolve from the local documentation asset.
-  /// - Returns: A fetch response containing the resolved documentation entry.
+  /// - Parameter identifier: The identifier to resolve from the local documentation asset.
+  /// - Returns: The resolved documentation entry.
   /// - Throws: An error if the documentation asset cannot be found, if the identifier does
   ///   not exist, or if the underlying storage backend fails to load the entry.
-  public func fetch(_ request: FetchRequest) throws -> FetchResponse {
+  public func fetch(_ identifier: String) throws -> FetchResult {
     let databaseDirectoryURL = try DocumentationAssetLocator().locateDatabaseDirectoryURL()
 
     let searchClient = try VectorSearchClient(
@@ -76,21 +82,19 @@ public struct Client {
       readOnly: true
     )
 
-    guard let result = try searchClient.fetch(identifier: request.identifier) else {
+    guard let result = try searchClient.fetch(identifier: identifier) else {
       throw BridgeError(
         .assetNotFound,
-        "No documentation entry was found for \(request.identifier)"
+        "No documentation entry was found for \(identifier)"
       )
     }
 
-    return FetchResponse(
-      result: FetchResult(
-        identifier: result.identifier,
-        framework: result.framework,
-        kind: result.type.flatMap(DocumentationKind.init(rawValue:)),
-        title: result.title,
-        content: result.content
-      )
+    return FetchResult(
+      identifier: result.identifier,
+      framework: result.framework,
+      kind: result.type.flatMap(DocumentationKind.init(rawValue:)),
+      title: result.title,
+      content: result.content
     )
   }
 

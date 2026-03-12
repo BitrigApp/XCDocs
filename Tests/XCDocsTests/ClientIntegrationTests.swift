@@ -11,83 +11,70 @@ struct ClientIntegrationTests {
 
   @Test
   func searchReturnsResultsForALiveQuery() async throws {
-    let response = try await client.search(
-      SearchRequest(
-        query: LiveEnvironment.searchQuery,
-        maxResults: 3
-      )
+    let results = try await client.search(
+      LiveEnvironment.searchQuery,
+      maxResults: 3
     )
 
-    #expect(response.query == LiveEnvironment.searchQuery)
-    #expect(!response.results.isEmpty)
+    #expect(!results.isEmpty)
   }
 
   @Test
   func frameworkFilteringWorksEndToEnd() async throws {
-    let response = try await client.search(
-      SearchRequest(
-        query: LiveEnvironment.searchQuery,
-        frameworks: [LiveEnvironment.searchFramework],
-        maxResults: 5
-      )
+    let results = try await client.search(
+      LiveEnvironment.searchQuery,
+      frameworks: [LiveEnvironment.searchFramework],
+      maxResults: 5
     )
 
-    #expect(!response.results.isEmpty)
-    #expect(response.results.allSatisfy { $0.framework == LiveEnvironment.searchFramework })
+    #expect(!results.isEmpty)
+    #expect(results.allSatisfy { $0.framework == LiveEnvironment.searchFramework })
   }
 
   @Test
   func kindFilteringWorksEndToEnd() async throws {
-    let response = try await client.search(
-      SearchRequest(
-        query: LiveEnvironment.searchQuery,
-        kinds: [.article],
-        maxResults: 5
-      )
+    let results = try await client.search(
+      LiveEnvironment.searchQuery,
+      kinds: [.article],
+      maxResults: 5
     )
 
-    #expect(!response.results.isEmpty)
-    #expect(response.results.allSatisfy { $0.kind == .article })
+    #expect(!results.isEmpty)
+    #expect(results.allSatisfy { $0.kind == .article })
   }
 
   @Test
   func includeContentIsReflectedInMappedSearchResults() async throws {
     let withoutContent = try await client.search(
-      SearchRequest(
-        query: "swiftui color",
-        maxResults: 5,
-        includeContent: false
-      )
+      "swiftui color",
+      maxResults: 5,
+      includeContent: false
     )
     let withContent = try await client.search(
-      SearchRequest(
-        query: "swiftui color",
-        maxResults: 5,
-        includeContent: true
-      )
+      "swiftui color",
+      maxResults: 5,
+      includeContent: true
     )
 
-    #expect(withoutContent.results.allSatisfy { $0.content == nil })
-    #expect(withContent.results.contains { !(($0.content ?? "").isEmpty) })
+    #expect(withoutContent.allSatisfy { $0.content == nil })
+    #expect(withContent.contains { !(($0.content ?? "").isEmpty) })
   }
 
   @Test
   func fetchReturnsExpectedMetadataAndContent() throws {
-    let response = try client.fetch(
-      FetchRequest(identifier: LiveEnvironment.documentationIdentifier)
-    )
+    let result = try client.fetch(LiveEnvironment.documentationIdentifier)
 
-    #expect(response.result.identifier == LiveEnvironment.documentationIdentifier)
-    #expect(response.result.framework == LiveEnvironment.searchFramework)
-    #expect(!(response.result.title ?? "").isEmpty)
-    #expect(!(response.result.content ?? "").isEmpty)
+    #expect(result.identifier == LiveEnvironment.documentationIdentifier)
+    #expect(result.framework == LiveEnvironment.searchFramework)
+    #expect(!(result.title ?? "").isEmpty)
+    #expect(!(result.content ?? "").isEmpty)
   }
 
   @Test
   func missingIdentifiersThrowAssetNotFoundBridgeErrors() throws {
     let error = try #require(
       captureBridgeError {
-        try client.fetch(FetchRequest(identifier: "/documentation/DefinitelyNotReal"))
+        try client.fetch("/documentation/DefinitelyNotReal")
       })
 
     #expect(error.code == .assetNotFound)

@@ -47,18 +47,16 @@ import XCDocs
 
 let client = Client()
 
-let searchResponse = try await client.search(
-    SearchRequest(
-        query: "swift testing",
-        frameworks: ["Swift Testing"],
-        kinds: [.article],
-        maxResults: 5,
-        includeContent: true
-    )
+let searchResults = try await client.search(
+    "swift testing",
+    frameworks: ["Swift Testing"],
+    kinds: [.article],
+    maxResults: 5,
+    includeContent: true
 )
 
-let fetchResponse = try client.fetch(
-    FetchRequest(identifier: "/documentation/Testing")
+let fetchResult = try client.fetch(
+    "/documentation/Testing"
 )
 ```
 

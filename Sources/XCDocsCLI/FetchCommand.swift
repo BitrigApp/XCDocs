@@ -16,28 +16,28 @@ struct FetchCommand: AsyncParsableCommand {
 
   mutating func run() async throws {
     let client = Client()
-    let response = try client.fetch(FetchRequest(identifier: identifier))
+    let result = try client.fetch(identifier)
 
     if json {
-      try printJSON(response)
+      try printJSON(result)
       return
     }
 
-    printFetchResponse(response)
+    printFetchResult(result)
   }
 }
 
-private func printFetchResponse(_ response: FetchResponse) {
-  print(response.result.identifier)
+private func printFetchResult(_ result: FetchResult) {
+  print(result.identifier)
 
-  let metadata = [response.result.framework, response.result.kind?.rawValue, response.result.title]
+  let metadata = [result.framework, result.kind?.rawValue, result.title]
     .compactMap { $0 }
     .joined(separator: " | ")
   if !metadata.isEmpty {
     print(metadata)
   }
 
-  if let content = response.result.content, !content.isEmpty {
+  if let content = result.content, !content.isEmpty {
     print("")
     print(content)
   }

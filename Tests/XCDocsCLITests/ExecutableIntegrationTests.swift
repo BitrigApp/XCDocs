@@ -77,12 +77,11 @@ struct ExecutableLiveIntegrationTests {
     ])
 
     let json = try dictionaryJSON(from: result.stdout)
-    let response = try #require(json["result"] as? [String: Any])
 
     #expect(result.exitStatus == 0)
-    #expect(response["identifier"] as? String == LiveEnvironment.documentationIdentifier)
-    #expect(response["framework"] as? String == LiveEnvironment.searchFramework)
-    #expect(response["title"] as? String != nil)
+    #expect(json["identifier"] as? String == LiveEnvironment.documentationIdentifier)
+    #expect(json["framework"] as? String == LiveEnvironment.searchFramework)
+    #expect(json["title"] as? String != nil)
   }
 
   @Test
