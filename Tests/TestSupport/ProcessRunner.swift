@@ -58,7 +58,6 @@ package enum ProcessRunner {
         let directCandidates = [
             buildURL.appendingPathComponent("debug/xcdocs"),
             buildURL.appendingPathComponent("arm64-apple-macosx/debug/xcdocs"),
-            buildURL.appendingPathComponent("x86_64-apple-macosx/debug/xcdocs"),
         ]
 
         for candidate in directCandidates where fileManager.isExecutableFile(atPath: candidate.path) {

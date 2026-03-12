@@ -129,7 +129,6 @@ public struct Client {
             )
         }
 
-        #if arch(arm64)
         var result = Data(capacity: expectedCount * MemoryLayout<Float>.size)
         float16Data.withUnsafeBytes { (rawBuffer: UnsafeRawBufferPointer) in
             let halfValues = rawBuffer.bindMemory(to: UInt16.self)
@@ -139,8 +138,5 @@ public struct Client {
             }
         }
         return result
-        #else
-        fatalError()
-        #endif
     }
 }

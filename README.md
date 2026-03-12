@@ -8,7 +8,9 @@ The `xcdocs` CLI is designed for use by agents, like Bitrig's agent, Codex, or C
 
 ## Availability
 
-XCDocs has been tested on Xcode 26.3 RC and above on macOS 26. 
+XCDocs targets macOS 26 and requires Apple Silicon (`arm64`).
+
+It has been tested on Xcode 26.3 RC and above on macOS 26.
 
 ## Build
 
