@@ -24,19 +24,6 @@ struct GetCommand: AsyncParsableCommand {
             return
         }
 
-        printEntry(result)
-    }
-}
-
-@available(macOS 26, *)
-private func printEntry(_ result: DocumentationEntry) {
-    print(result.id)
-
-    let metadata = [result.framework, result.kind?.rawValue, result.title].compactMap { $0 }.joined(separator: " | ")
-    if !metadata.isEmpty { print(metadata) }
-
-    if let content = result.content, !content.isEmpty {
-        print("")
-        print(content)
+        print(renderTextEntry(result), terminator: "")
     }
 }
