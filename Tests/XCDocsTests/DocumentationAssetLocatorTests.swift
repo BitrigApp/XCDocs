@@ -51,6 +51,38 @@ struct DocumentationAssetLocatorTests {
     }
 
     @Test
+    func rethrowsNonMissingIndexReadErrorsDuringCandidateFiltering() throws {
+        let rootURL = try makeTemporaryDirectory()
+        let assetURL = rootURL.appendingPathComponent("blocked.asset", isDirectory: true)
+        let databaseDirectoryURL = try createAsset(
+            at: assetURL,
+            includesIndex: true,
+            modificationDate: .distantPast.addingTimeInterval(10)
+        )
+        let indexURL = databaseDirectoryURL.appendingPathComponent("index.sql")
+
+        defer {
+            try? FileManager.default.setAttributes([.posixPermissions: 0o644], ofItemAtPath: indexURL.path)
+            try? FileManager.default.removeItem(at: rootURL)
+        }
+
+        try FileManager.default.setAttributes([.posixPermissions: 0o000], ofItemAtPath: indexURL.path)
+
+        do {
+            _ = try DocumentationAssetLocator(assetRootURL: rootURL).locateDatabaseDirectoryURL()
+            Issue.record("Expected unreadable index error to be rethrown.")
+        } catch let error as BridgeError {
+            Issue.record("Expected underlying filesystem error, got BridgeError: \(error)")
+        } catch {
+            let nsError = error as NSError
+            #expect(nsError.domain == NSCocoaErrorDomain)
+            #expect(
+                nsError.code == NSFileReadNoPermissionError || nsError.code == NSFileWriteNoPermissionError
+            )
+        }
+    }
+
+    @Test
     func ignoresInvalidAssetsWhenSelectingTheDatabaseDirectory() throws {
         let rootURL = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: rootURL) }

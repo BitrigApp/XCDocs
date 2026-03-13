@@ -17,7 +17,10 @@ package struct DocumentationAssetLocator {
     package func locateDatabaseDirectoryURL() throws -> URL {
         let contents = try assetRootContents()
 
-        let candidates = contents.filter { $0.pathExtension == "asset" }.filter { hasReadableIndex(at: $0) }.sorted {
+        let candidates = try contents
+            .filter { $0.pathExtension == "asset" }
+            .filter { try hasReadableIndex(at: $0) }
+            .sorted {
             lhs,
             rhs in modificationDate(for: lhs) > modificationDate(for: rhs)
         }
@@ -71,11 +74,15 @@ package struct DocumentationAssetLocator {
         }
     }
 
-    private func hasReadableIndex(at assetURL: URL) -> Bool {
+    private func hasReadableIndex(at assetURL: URL) throws -> Bool {
         do {
             try openAndCloseFile(at: indexURL(forAssetURL: assetURL))
             return true
-        } catch { return false }
+        } catch {
+            if isMissingFileError(error) { return false }
+
+            throw error
+        }
     }
 
     private func indexURL(forAssetURL assetURL: URL) -> URL {
