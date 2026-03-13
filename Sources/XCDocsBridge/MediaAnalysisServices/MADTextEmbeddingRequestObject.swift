@@ -50,6 +50,7 @@ package struct MADTextEmbeddingRequestObject: PrivateObject {
             elementCount = resolvedCount
         }
 
+        #if arch(arm64)
         var float32Data = Data(capacity: elementCount * MemoryLayout<Float>.size)
         embeddingData.withUnsafeBytes { (rawBuffer: UnsafeRawBufferPointer) in
             let halfValues = rawBuffer.bindMemory(to: UInt16.self)
@@ -60,5 +61,8 @@ package struct MADTextEmbeddingRequestObject: PrivateObject {
         }
 
         return float32Data
+        #else
+        fatalError()
+        #endif
     }
 }

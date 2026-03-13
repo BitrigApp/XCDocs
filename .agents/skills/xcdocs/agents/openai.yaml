@@ -1,0 +1,4 @@
+interface:
+  display_name: "XCDocs"
+  short_description: "Query local Apple docs with xcdocs"
+  default_prompt: "Use $xcdocs while debugging Apple framework code to find the right symbols and documentation entries before patching the implementation."

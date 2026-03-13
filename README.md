@@ -49,6 +49,13 @@ xcdocs get /documentation/Testing
 xcdocs get /documentation/Testing --json
 ```
 
+## Agent Skill
+
+This repository includes a standard Agent Skills bundle at [.agents/skills/xcdocs](.agents/skills/xcdocs) for agents fixing or implementing code that depends on Apple frameworks.
+
+- Codex: use the checked-in project copy in `.agents/skills/xcdocs`, or copy/symlink it to `~/.agents/skills/xcdocs`.
+- Claude Code: copy/symlink the same folder to `.claude/skills/xcdocs` for this repo or `~/.claude/skills/xcdocs` for all projects.
+
 ## Swift API
 
 XCDocs also exposes a Swift package which you can integrate into other tools.
