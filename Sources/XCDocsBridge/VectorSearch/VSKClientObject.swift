@@ -112,6 +112,35 @@ package final class VSKClientObject: PrivateObject {
         return assets.map(VSKAssetObject.init(base:))
     }
 
+    package func stringIdentifiers(applying attributeFilters: [VSKFilterObject]) throws -> [String] {
+        guard
+            let method = objcInstanceMethod(
+                selector: Self.stringIdentifiersApplyingFiltersSelector,
+                as: VSKStringIdentifiersApplyingFiltersMethod.self
+            )
+        else {
+            throw BridgeError(.selectorUnavailable, "Missing stringIdentifiersApplyingFilters selector on VSKClient")
+        }
+
+        var errorObject: AnyObject?
+        let identifiersObject = method(
+            base,
+            Self.stringIdentifiersApplyingFiltersSelector,
+            attributeFilters.isEmpty ? nil : attributeFilters.map(\.base) as NSArray,
+            &errorObject
+        )
+
+        if let errorObject = errorObject as? Error {
+            throw BridgeError(.searchFailed, "Identifier lookup failed", underlyingError: errorObject)
+        }
+
+        guard let identifiers = identifiersObject as? [String] else {
+            throw BridgeError(.invalidResponse, "Identifier lookup returned an unexpected response")
+        }
+
+        return identifiers
+    }
+
     package func asset(
         forIdentifier identifier: String,
         attributeFilters: [VSKFilterObject],
@@ -137,6 +166,9 @@ package final class VSKClientObject: PrivateObject {
     private static let stringIdentifiedAssetsSelector = NSSelectorFromString(
         "stringIdentifiedAssetsWithIdentifiers:attributeFilters:pagination:includeVectors:selectAttributes:error:"
     )
+    private static let stringIdentifiersApplyingFiltersSelector = NSSelectorFromString(
+        "stringIdentifiersApplyingFilters:error:"
+    )
 }
 
 private typealias VSKClientInitMethod =
@@ -152,3 +184,6 @@ private typealias VSKStringIdentifiedAssetsMethod =
     @convention(c) (
         AnyObject, Selector, NSArray, NSArray?, AnyObject?, Bool, NSArray?, UnsafeMutablePointer<AnyObject?>?
     ) -> AnyObject?
+
+private typealias VSKStringIdentifiersApplyingFiltersMethod =
+    @convention(c) (AnyObject, Selector, NSArray?, UnsafeMutablePointer<AnyObject?>?) -> AnyObject?
