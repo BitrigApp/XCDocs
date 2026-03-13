@@ -15,18 +15,21 @@ package struct DocumentationAssetLocator {
     }
 
     package func locateDatabaseDirectoryURL() throws -> URL {
-        guard fileManager.fileExists(atPath: assetRootURL.path) else {
-            throw BridgeError(.assetNotFound, "Documentation asset root is missing at \(assetRootURL.path)")
-        }
+        let contents: [URL]
+        do {
+            contents = try fileManager.contentsOfDirectory(
+                at: assetRootURL,
+                includingPropertiesForKeys: [.isDirectoryKey, .contentModificationDateKey],
+                options: [.skipsHiddenFiles]
+            )
+        } catch { throw BridgeError(.assetNotFound, "Documentation asset root is missing at \(assetRootURL.path)") }
 
-        let candidates = try fileManager.contentsOfDirectory(
-            at: assetRootURL,
-            includingPropertiesForKeys: [.isDirectoryKey, .contentModificationDateKey],
-            options: [.skipsHiddenFiles]
-        ).filter { $0.pathExtension == "asset" }.filter { candidate in
-            let databaseDirectoryURL = candidate.appendingPathComponent("AssetData", isDirectory: true)
-                .appendingPathComponent("documentation-db", isDirectory: true)
-            return fileManager.fileExists(atPath: databaseDirectoryURL.appendingPathComponent("index.sql").path)
+        let candidates = contents.filter { $0.pathExtension == "asset" }.filter { candidate in
+            let indexURL = candidate.appendingPathComponent("AssetData", isDirectory: true).appendingPathComponent(
+                "documentation-db",
+                isDirectory: true
+            ).appendingPathComponent("index.sql")
+            return (try? FileHandle(forReadingFrom: indexURL)) != nil
         }.sorted { lhs, rhs in modificationDate(for: lhs) > modificationDate(for: rhs) }
 
         guard let assetURL = candidates.first else {
@@ -43,9 +46,10 @@ package struct DocumentationAssetLocator {
         let assetDataURL = assetURL.appendingPathComponent("AssetData", isDirectory: true)
         let databaseDirectoryURL = assetDataURL.appendingPathComponent("documentation-db", isDirectory: true)
         let indexURL = databaseDirectoryURL.appendingPathComponent("index.sql")
-        guard fileManager.fileExists(atPath: indexURL.path) else {
-            throw BridgeError(.assetNotFound, "Documentation index is missing at \(indexURL.path)")
-        }
+        do {
+            let handle = try FileHandle(forReadingFrom: indexURL)
+            handle.closeFile()
+        } catch { throw BridgeError(.assetNotFound, "Documentation index is missing at \(indexURL.path)") }
 
         return databaseDirectoryURL
     }
