@@ -2,6 +2,7 @@ import ArgumentParser
 import Foundation
 import XCDocs
 
+@available(macOS 26, *)
 extension DocumentationKind: ExpressibleByArgument {}
 
 @available(macOS 26, *) struct SearchCommand: AsyncParsableCommand {
@@ -46,6 +47,7 @@ extension DocumentationKind: ExpressibleByArgument {}
     }
 }
 
+@available(macOS 26, *)
 private func printDocumentationSearchJSON(_ results: [SearchResult]) throws {
     struct DocumentationSearchDocument: Encodable {
         let contents: String

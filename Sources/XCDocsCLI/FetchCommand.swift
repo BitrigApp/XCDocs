@@ -25,6 +25,7 @@ import XCDocs
     }
 }
 
+@available(macOS 26, *)
 private func printFetchResult(_ result: FetchResult) {
     print(result.identifier)
 
