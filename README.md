@@ -6,6 +6,8 @@ It exposes the same data and functionality which powers Xcode's MCP tool, called
 
 The `xcdocs` CLI is designed for use by agents, like Bitrig's agent, Codex, or Claude Code.
 
+![Demo of the xcdocs CLI](demo.gif)
+
 ## Availability
 
 - macOS 26+
