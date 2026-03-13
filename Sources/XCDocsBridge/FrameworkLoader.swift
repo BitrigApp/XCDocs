@@ -1,5 +1,6 @@
 import Foundation
 
+@PrivateObjectActor
 enum FrameworkLoader {
     static let mediaAnalysisServicesPath = "/System/Library/PrivateFrameworks/MediaAnalysisServices.framework"
     static let vectorSearchPath = "/System/Library/PrivateFrameworks/VectorSearch.framework"

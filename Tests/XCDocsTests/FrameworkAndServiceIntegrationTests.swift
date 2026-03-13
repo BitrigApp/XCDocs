@@ -6,11 +6,11 @@ import Testing
 @Suite("Framework and Service Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized)
 struct FrameworkAndServiceIntegrationTests {
     @Test
-    func loadsPrivateFrameworksIdempotently() throws {
-        let firstMediaAnalysisBundle = try FrameworkLoader.loadMediaAnalysisServices()
-        let secondMediaAnalysisBundle = try FrameworkLoader.loadMediaAnalysisServices()
-        let firstVectorSearchBundle = try FrameworkLoader.loadVectorSearch()
-        let secondVectorSearchBundle = try FrameworkLoader.loadVectorSearch()
+    func loadsPrivateFrameworksIdempotently() async throws {
+        let firstMediaAnalysisBundle = try await FrameworkLoader.loadMediaAnalysisServices()
+        let secondMediaAnalysisBundle = try await FrameworkLoader.loadMediaAnalysisServices()
+        let firstVectorSearchBundle = try await FrameworkLoader.loadVectorSearch()
+        let secondVectorSearchBundle = try await FrameworkLoader.loadVectorSearch()
 
         #expect(firstMediaAnalysisBundle.bundleURL == secondMediaAnalysisBundle.bundleURL)
         #expect(firstVectorSearchBundle.bundleURL == secondVectorSearchBundle.bundleURL)
