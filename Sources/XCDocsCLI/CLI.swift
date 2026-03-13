@@ -4,7 +4,7 @@ import XCDocs
 @main
 struct CLIEntryPoint {
     static func main() async throws {
-        guard #available(macOS 26, *) else { throw ValidationError("XCDocs requires macOS 26 or newer.") }
+        guard #available(macOS 26, *) else { throw ValidationError("xcdocs requires macOS 26 or later.") }
         await CLI.main()
     }
 }
