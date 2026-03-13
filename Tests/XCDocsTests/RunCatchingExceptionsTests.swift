@@ -1,4 +1,5 @@
 import Foundation
+import TestSupport
 import Testing
 
 @testable import ExceptionCatcher
@@ -57,17 +58,6 @@ private func captureFixtureError<T>(_ work: () throws -> T) -> FixtureError? {
         Issue.record("Expected FixtureError to be thrown.")
         return nil
     } catch let error as FixtureError { return error } catch {
-        Issue.record("Unexpected error: \(String(describing: error))")
-        return nil
-    }
-}
-
-private func captureBridgeError<T>(_ work: () throws -> T) -> BridgeError? {
-    do {
-        _ = try work()
-        Issue.record("Expected BridgeError to be thrown.")
-        return nil
-    } catch let error as BridgeError { return error } catch {
         Issue.record("Unexpected error: \(String(describing: error))")
         return nil
     }

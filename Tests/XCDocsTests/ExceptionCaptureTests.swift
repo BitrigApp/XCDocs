@@ -22,6 +22,42 @@ struct ExceptionCaptureTests {
     }
 
     @Test
+    func handlesExceptionWithNilReason() throws {
+        let error = XCDocsCatchException { NSException(name: .genericException, reason: nil, userInfo: nil).raise() }
+
+        let nsError = try #require(error as NSError?)
+        #expect(nsError.domain == "ExceptionCatcherObjC.Exception")
+        #expect(nsError.code == 1)
+        #expect(nsError.userInfo[NSLocalizedDescriptionKey] as? String == "Objective-C exception")
+        #expect(nsError.userInfo["XCDocsExceptionReason"] == nil)
+    }
+
+    @Test
+    func capturesRangeException() throws {
+        let error = XCDocsCatchException {
+            NSException(name: .rangeException, reason: "index out of bounds", userInfo: nil).raise()
+        }
+
+        let nsError = try #require(error as NSError?)
+        #expect(nsError.userInfo["XCDocsExceptionName"] as? String == NSExceptionName.rangeException.rawValue)
+        #expect(nsError.userInfo["XCDocsExceptionReason"] as? String == "index out of bounds")
+    }
+
+    @Test
+    func capturesInternalInconsistencyException() throws {
+        let error = XCDocsCatchException {
+            NSException(name: .internalInconsistencyException, reason: "inconsistent state", userInfo: nil).raise()
+        }
+
+        let nsError = try #require(error as NSError?)
+        #expect(
+            nsError.userInfo["XCDocsExceptionName"] as? String
+                == NSExceptionName.internalInconsistencyException.rawValue
+        )
+        #expect(nsError.userInfo["XCDocsExceptionReason"] as? String == "inconsistent state")
+    }
+
+    @Test
     func preservesExceptionNameAndReasonMetadata() throws {
         let error = XCDocsCatchException {
             NSException(name: .invalidArgumentException, reason: "bad argument", userInfo: nil).raise()

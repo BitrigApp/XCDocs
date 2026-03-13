@@ -47,6 +47,65 @@ struct DocumentationAssetLocatorTests {
     }
 
     @Test
+    func selectsSingleValidAsset() throws {
+        let rootURL = try makeTemporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: rootURL) }
+
+        let assetURL = rootURL.appendingPathComponent("only.asset", isDirectory: true)
+        let databaseURL = try createAsset(
+            at: assetURL,
+            includesIndex: true,
+            modificationDate: .distantPast.addingTimeInterval(10)
+        )
+
+        let locator = DocumentationAssetLocator(assetRootURL: rootURL)
+        let result = try locator.locateDatabaseDirectoryURL()
+
+        #expect(canonicalFileURL(result) == canonicalFileURL(databaseURL))
+    }
+
+    @Test
+    func selectsEitherAssetWhenModificationTimestampsAreIdentical() throws {
+        let rootURL = try makeTemporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: rootURL) }
+
+        let timestamp = Date.distantPast.addingTimeInterval(100)
+        let assetAURL = rootURL.appendingPathComponent("a.asset", isDirectory: true)
+        let assetBURL = rootURL.appendingPathComponent("b.asset", isDirectory: true)
+        let dbA = try createAsset(at: assetAURL, includesIndex: true, modificationDate: timestamp)
+        let dbB = try createAsset(at: assetBURL, includesIndex: true, modificationDate: timestamp)
+
+        let locator = DocumentationAssetLocator(assetRootURL: rootURL)
+        let result = try locator.locateDatabaseDirectoryURL()
+        let canonical = canonicalFileURL(result)
+
+        #expect(canonical == canonicalFileURL(dbA) || canonical == canonicalFileURL(dbB))
+    }
+
+    @Test
+    func throwsWhenAllCandidateAssetsAreInvalid() throws {
+        let rootURL = try makeTemporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: rootURL) }
+
+        _ = try createAsset(
+            at: rootURL.appendingPathComponent("bad1.asset", isDirectory: true),
+            includesIndex: false,
+            modificationDate: .distantPast.addingTimeInterval(10)
+        )
+        _ = try createAsset(
+            at: rootURL.appendingPathComponent("bad2.asset", isDirectory: true),
+            includesIndex: false,
+            modificationDate: .distantPast.addingTimeInterval(20)
+        )
+
+        let error = try #require(
+            captureBridgeError { try DocumentationAssetLocator(assetRootURL: rootURL).locateDatabaseDirectoryURL() }
+        )
+
+        #expect(error.code == .assetNotFound)
+    }
+
+    @Test
     func selectsTheNewestValidAsset() throws {
         let rootURL = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: rootURL) }
@@ -80,17 +139,6 @@ struct DocumentationAssetLocatorLiveSmokeTests {
 
         #expect(FileManager.default.fileExists(atPath: databaseDirectoryURL.path))
         #expect(FileManager.default.fileExists(atPath: indexURL.path))
-    }
-}
-
-private func captureBridgeError<T>(_ work: () throws -> T) -> BridgeError? {
-    do {
-        _ = try work()
-        Issue.record("Expected BridgeError to be thrown.")
-        return nil
-    } catch let error as BridgeError { return error } catch {
-        Issue.record("Unexpected error: \(String(describing: error))")
-        return nil
     }
 }
 

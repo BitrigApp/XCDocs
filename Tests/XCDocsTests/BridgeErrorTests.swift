@@ -14,6 +14,27 @@ struct BridgeErrorTests {
     }
 
     @Test
+    func formatsDescriptionWithEmptyMessage() {
+        let error = BridgeError(.operationFailed, "")
+
+        #expect(error.description == "[operationFailed] ")
+        #expect(error.errorDescription == "[operationFailed] ")
+    }
+
+    @Test
+    func formatsDescriptionForAllErrorCodes() {
+        let codes: [BridgeErrorCode] = [
+            .frameworkUnavailable, .classUnavailable, .selectorUnavailable, .assetNotFound, .invalidResponse,
+            .invalidEmbedding, .operationFailed, .searchFailed, .timeout,
+        ]
+
+        for code in codes {
+            let error = BridgeError(code, "msg")
+            #expect(error.description == "[\(code.rawValue)] msg")
+        }
+    }
+
+    @Test
     func formatsDescriptionWithUnderlyingError() {
         let underlyingError = NSError(domain: "Example", code: 7, userInfo: [NSLocalizedDescriptionKey: "Disk full"])
         let error = BridgeError(.operationFailed, "Operation failed", underlyingError: underlyingError)
