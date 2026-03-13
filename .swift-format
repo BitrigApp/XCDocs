@@ -5,6 +5,7 @@
   },
   "lineLength": 120,
   "lineBreakBeforeEachArgument": true,
+  "lineBreakBetweenDeclarationAttributes": true,
   "respectsExistingLineBreaks": false,
   "spacesBeforeEndOfLineComments": 1,
   "indentConditionalCompilationBlocks": false,

@@ -4,19 +4,23 @@ import Testing
 @testable import ExceptionCatcher
 @testable import XCDocsBridge
 
-@Suite("runCatchingExceptions") struct RunCatchingExceptionsTests {
-    @Test func returnsSuccessfulValues() throws {
+@Suite("runCatchingExceptions")
+struct RunCatchingExceptionsTests {
+    @Test
+    func returnsSuccessfulValues() throws {
         let value = try runCatchingExceptions { 42 }
         #expect(value == 42)
     }
 
-    @Test func propagatesSwiftErrorsUnchanged() {
+    @Test
+    func propagatesSwiftErrorsUnchanged() {
         let error = captureFixtureError { try runCatchingExceptions { throw FixtureError.sample } }
 
         #expect(error == .sample)
     }
 
-    @Test func wrapsObjectiveCExceptionsAsBridgeErrors() throws {
+    @Test
+    func wrapsObjectiveCExceptionsAsBridgeErrors() throws {
         let error = try #require(
             captureBridgeError {
                 try runCatchingExceptions {
@@ -30,7 +34,8 @@ import Testing
         #expect((error.underlyingError as NSError?)?.userInfo["XCDocsExceptionReason"] as? String == "boom")
     }
 
-    @Test func mapsNilPathArgumentExceptionsToBootstrapMessage() throws {
+    @Test
+    func mapsNilPathArgumentExceptionsToBootstrapMessage() throws {
         let error = try #require(
             captureBridgeError {
                 try runCatchingExceptions {

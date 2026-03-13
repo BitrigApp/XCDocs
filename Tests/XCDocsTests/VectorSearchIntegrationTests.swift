@@ -5,14 +5,16 @@ import Testing
 
 @Suite("VectorSearch Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized)
 struct VectorSearchIntegrationTests {
-    @Test func initializesConfigAndClientAgainstTheLiveDatabase() throws {
+    @Test
+    func initializesConfigAndClientAgainstTheLiveDatabase() throws {
         let databaseDirectoryURL = try LiveEnvironment.databaseDirectoryURL()
         let config = try VSKConfigObject(baseDirectoryURL: databaseDirectoryURL, numberOfProbes: 8, readOnly: true)
 
         _ = try VSKClientObject(config: config)
     }
 
-    @Test func looksUpAssetsByIdentifier() throws {
+    @Test
+    func looksUpAssetsByIdentifier() throws {
         let databaseDirectoryURL = try LiveEnvironment.databaseDirectoryURL()
         let config = try VSKConfigObject(baseDirectoryURL: databaseDirectoryURL, numberOfProbes: 8, readOnly: true)
         let client = try VSKClientObject(config: config)

@@ -5,8 +5,10 @@ import Testing
 @testable import XCDocsBridge
 @testable import XCDocsSupport
 
-@Suite("Documentation Asset Locator") struct DocumentationAssetLocatorTests {
-    @Test func throwsWhenTheAssetRootIsMissing() throws {
+@Suite("Documentation Asset Locator")
+struct DocumentationAssetLocatorTests {
+    @Test
+    func throwsWhenTheAssetRootIsMissing() throws {
         let rootURL = FileManager.default.temporaryDirectory.appendingPathComponent(
             UUID().uuidString,
             isDirectory: true
@@ -20,7 +22,8 @@ import Testing
         #expect(error.message.contains(rootURL.path))
     }
 
-    @Test func ignoresInvalidAssetsWhenSelectingTheDatabaseDirectory() throws {
+    @Test
+    func ignoresInvalidAssetsWhenSelectingTheDatabaseDirectory() throws {
         let rootURL = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: rootURL) }
 
@@ -43,7 +46,8 @@ import Testing
         #expect(canonicalFileURL(databaseDirectoryURL) == canonicalFileURL(olderValidDatabaseURL))
     }
 
-    @Test func selectsTheNewestValidAsset() throws {
+    @Test
+    func selectsTheNewestValidAsset() throws {
         let rootURL = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: rootURL) }
 
@@ -69,7 +73,8 @@ import Testing
 
 @Suite("Documentation Asset Locator Live Smoke", .enabled(if: LiveEnvironment.isAvailable), .serialized)
 struct DocumentationAssetLocatorLiveSmokeTests {
-    @Test func resolvesALiveDatabaseDirectoryContainingIndexSQL() throws {
+    @Test
+    func resolvesALiveDatabaseDirectoryContainingIndexSQL() throws {
         let databaseDirectoryURL = try DocumentationAssetLocator().locateDatabaseDirectoryURL()
         let indexURL = databaseDirectoryURL.appendingPathComponent("index.sql")
 

@@ -1,7 +1,8 @@
 import Foundation
 
 /// A single documentation entry returned from `Client.fetch`.
-@available(macOS 26, *) public struct FetchResult: Codable, Hashable, Sendable {
+@available(macOS 26, *)
+public struct FetchResult: Codable, Hashable, Sendable {
     /// The stable documentation identifier for the entry.
     public let identifier: String
 

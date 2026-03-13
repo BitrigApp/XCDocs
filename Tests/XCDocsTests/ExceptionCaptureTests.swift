@@ -2,13 +2,16 @@ import ExceptionCatcherObjC
 import Foundation
 import Testing
 
-@Suite("Objective-C Exception Capture") struct ExceptionCaptureTests {
-    @Test func returnsNilWhenWorkCompletesSuccessfully() {
+@Suite("Objective-C Exception Capture")
+struct ExceptionCaptureTests {
+    @Test
+    func returnsNilWhenWorkCompletesSuccessfully() {
         let error = XCDocsCatchException {}
         #expect(error == nil)
     }
 
-    @Test func convertsRaisedExceptionsIntoNSError() throws {
+    @Test
+    func convertsRaisedExceptionsIntoNSError() throws {
         let error = XCDocsCatchException {
             NSException(name: .invalidArgumentException, reason: "boom", userInfo: nil).raise()
         }
@@ -18,7 +21,8 @@ import Testing
         #expect(nsError.code == 1)
     }
 
-    @Test func preservesExceptionNameAndReasonMetadata() throws {
+    @Test
+    func preservesExceptionNameAndReasonMetadata() throws {
         let error = XCDocsCatchException {
             NSException(name: .invalidArgumentException, reason: "bad argument", userInfo: nil).raise()
         }

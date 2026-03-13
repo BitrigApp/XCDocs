@@ -3,8 +3,10 @@ import Testing
 
 @testable import XCDocsBridge
 
-@Suite("PrivateObject") struct PrivateObjectTests {
-    @Test func readsValuesAndFallbacksViaKVC() {
+@Suite("PrivateObject")
+struct PrivateObjectTests {
+    @Test
+    func readsValuesAndFallbacksViaKVC() {
         let fixture = KeyValueFixture()
         let wrapper = FixtureWrapper(base: fixture)
 
@@ -14,7 +16,8 @@ import Testing
         #expect(wrapper.array(forKey: "objectArray").count == 2)
     }
 
-    @Test func resolvesClassesAndAllocatesObjects() throws {
+    @Test
+    func resolvesClassesAndAllocatesObjects() throws {
         let className = NSStringFromClass(KeyValueFixture.self)
         let cls: AnyClass = try FixtureWrapper.requiredClass(named: className)
         let nsObjectClass = try FixtureWrapper.requiredNSObjectClass(named: className)
@@ -25,7 +28,8 @@ import Testing
         #expect(ObjectIdentifier(type(of: allocatedObject)) == ObjectIdentifier(KeyValueFixture.self))
     }
 
-    @Test func resolvesInstanceAndClassMethods() throws {
+    @Test
+    func resolvesInstanceAndClassMethods() throws {
         let fixture = KeyValueFixture()
         let wrapper = FixtureWrapper(base: fixture)
         let instanceSelector = NSSelectorFromString("answer")
@@ -43,7 +47,8 @@ import Testing
 
 private struct FixtureWrapper: PrivateObject { let base: AnyObject }
 
-@objcMembers private final class KeyValueFixture: NSObject {
+@objcMembers
+private final class KeyValueFixture: NSObject {
     dynamic var stringValue = "hello"
     dynamic var numberValue = NSNumber(value: 42)
     dynamic var objectArray: [AnyObject] = ["first" as NSString, NSNumber(value: 2)]

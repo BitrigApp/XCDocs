@@ -22,7 +22,8 @@ package final class MADServiceObject: PrivateObject {
         self.base = object
     }
 
-    @discardableResult package func performRequests(
+    @discardableResult
+    package func performRequests(
         requests: [MADTextEmbeddingRequestObject],
         textInputs: [MADTextInputObject],
         completionHandler: AnyObject?

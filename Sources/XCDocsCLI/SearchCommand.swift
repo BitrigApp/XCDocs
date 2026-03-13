@@ -5,10 +5,12 @@ import XCDocs
 @available(macOS 26, *)
 extension DocumentationKind: ExpressibleByArgument {}
 
-@available(macOS 26, *) struct SearchCommand: AsyncParsableCommand {
+@available(macOS 26, *)
+struct SearchCommand: AsyncParsableCommand {
     static let configuration = CommandConfiguration(commandName: "search", abstract: "Search the documentation asset.")
 
-    @Argument(help: "The search query.") var queryParts: [String] = []
+    @Argument(help: "The search query.")
+    var queryParts: [String] = []
 
     @Option(name: .customLong("framework"), help: "Restrict results to a framework. Repeat to add more.")
     var frameworks: [String] = []
@@ -16,13 +18,17 @@ extension DocumentationKind: ExpressibleByArgument {}
     @Option(
         name: .customLong("kind"),
         help: "Restrict results to a documentation kind like article, symbol, or topic. Repeat to add more."
-    ) var kinds: [DocumentationKind] = []
+    )
+    var kinds: [DocumentationKind] = []
 
-    @Option(help: "Maximum number of results to return.") var limit = 10
+    @Option(help: "Maximum number of results to return.")
+    var limit = 10
 
-    @Flag(help: "Omit document contents from each result.") var omitContent = false
+    @Flag(help: "Omit document contents from each result.")
+    var omitContent = false
 
-    @Flag(help: "Print the response as JSON.") var json = false
+    @Flag(help: "Print the response as JSON.")
+    var json = false
 
     mutating func validate() throws {
         guard !queryParts.isEmpty else { throw ValidationError("Search query is required.") }

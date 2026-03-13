@@ -6,7 +6,8 @@ import Testing
 
 @Suite("VectorSearchClient Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized)
 struct VectorSearchClientIntegrationTests {
-    @Test func fetchReturnsTheExpectedEntry() throws {
+    @Test
+    func fetchReturnsTheExpectedEntry() throws {
         let client = try makeClient()
         let hit = try #require(try client.fetch(identifier: LiveEnvironment.documentationIdentifier))
 
@@ -15,7 +16,8 @@ struct VectorSearchClientIntegrationTests {
         #expect(!(hit.title ?? "").isEmpty)
     }
 
-    @Test func searchReturnsResultsForALiveEmbeddingVector() async throws {
+    @Test
+    func searchReturnsResultsForALiveEmbeddingVector() async throws {
         let client = try makeClient()
         let vector = try await LiveEnvironment.embeddingVector(for: LiveEnvironment.searchQuery)
         let hits = try client.search(vector: vector, frameworks: [], kinds: [], limit: 3, includeContent: false)
@@ -23,7 +25,8 @@ struct VectorSearchClientIntegrationTests {
         #expect(!hits.isEmpty)
     }
 
-    @Test func normalizesAndAppliesFrameworkFilters() async throws {
+    @Test
+    func normalizesAndAppliesFrameworkFilters() async throws {
         let client = try makeClient()
         let vector = try await LiveEnvironment.embeddingVector(for: LiveEnvironment.searchQuery)
         let hits = try client.search(
@@ -38,7 +41,8 @@ struct VectorSearchClientIntegrationTests {
         #expect(hits.allSatisfy { $0.framework == LiveEnvironment.searchFramework })
     }
 
-    @Test func normalizesAndAppliesKindFilters() async throws {
+    @Test
+    func normalizesAndAppliesKindFilters() async throws {
         let client = try makeClient()
         let vector = try await LiveEnvironment.embeddingVector(for: LiveEnvironment.searchQuery)
         let hits = try client.search(
@@ -53,7 +57,8 @@ struct VectorSearchClientIntegrationTests {
         #expect(hits.allSatisfy { $0.type == "article" })
     }
 
-    @Test func includeContentControlsWhetherSearchResultsContainContent() async throws {
+    @Test
+    func includeContentControlsWhetherSearchResultsContainContent() async throws {
         let client = try makeClient()
         let vector = try await LiveEnvironment.embeddingVector(for: "swiftui color")
         let hitsWithoutContent = try client.search(
@@ -75,7 +80,8 @@ struct VectorSearchClientIntegrationTests {
         #expect(hitsWithContent.contains { !(($0.content ?? "").isEmpty) })
     }
 
-    @Test func returnsAnEmptyArrayWhenLimitIsZeroOrLess() throws {
+    @Test
+    func returnsAnEmptyArrayWhenLimitIsZeroOrLess() throws {
         let client = try makeClient()
         let hits = try client.search(
             vector: Data(),

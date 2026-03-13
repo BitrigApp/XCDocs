@@ -2,8 +2,10 @@ import Foundation
 import TestSupport
 import Testing
 
-@Suite("xcdocs Executable") struct ExecutableIntegrationTests {
-    @Test func helpRendersExpectedTopLevelOutput() async throws {
+@Suite("xcdocs Executable")
+struct ExecutableIntegrationTests {
+    @Test
+    func helpRendersExpectedTopLevelOutput() async throws {
         let result = try await ProcessRunner.runXCDocs(["--help"])
 
         #expect(result.exitStatus == 0)
@@ -13,7 +15,8 @@ import Testing
         #expect(result.stdout.contains("version"))
     }
 
-    @Test func missingQueryFailsValidation() async throws {
+    @Test
+    func missingQueryFailsValidation() async throws {
         let result = try await ProcessRunner.runXCDocs(["search"])
 
         #expect(result.exitStatus == 64)
@@ -23,7 +26,8 @@ import Testing
 
 @Suite("xcdocs Executable Live Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized)
 struct ExecutableLiveIntegrationTests {
-    @Test func searchJSONMatchesTheExpectedMCPShape() async throws {
+    @Test
+    func searchJSONMatchesTheExpectedMCPShape() async throws {
         let result = try await ProcessRunner.runXCDocs([
             "search", LiveEnvironment.searchQuery, "--framework", LiveEnvironment.searchFramework, "--limit", "3",
             "--json",
@@ -41,7 +45,8 @@ struct ExecutableLiveIntegrationTests {
         #expect(firstDocument["score"] as? NSNumber != nil)
     }
 
-    @Test func searchAcceptsKindFilters() async throws {
+    @Test
+    func searchAcceptsKindFilters() async throws {
         let result = try await ProcessRunner.runXCDocs([
             "search", LiveEnvironment.searchQuery, "--framework", LiveEnvironment.searchFramework, "--kind", "article",
             "--limit", "3", "--omit-content",
@@ -51,7 +56,8 @@ struct ExecutableLiveIntegrationTests {
         #expect(result.stdout.contains("article"))
     }
 
-    @Test func fetchJSONContainsTheExpectedResultShape() async throws {
+    @Test
+    func fetchJSONContainsTheExpectedResultShape() async throws {
         let result = try await ProcessRunner.runXCDocs(["fetch", LiveEnvironment.documentationIdentifier, "--json"])
 
         let json = try dictionaryJSON(from: result.stdout)
@@ -62,7 +68,8 @@ struct ExecutableLiveIntegrationTests {
         #expect(json["title"] as? String != nil)
     }
 
-    @Test func missingIdentifiersReturnTheRepoDefinedErrorMessage() async throws {
+    @Test
+    func missingIdentifiersReturnTheRepoDefinedErrorMessage() async throws {
         let result = try await ProcessRunner.runXCDocs(["fetch", "/documentation/DefinitelyNotReal"])
 
         #expect(result.exitStatus == 1)

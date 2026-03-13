@@ -3,8 +3,10 @@ import Testing
 
 @testable import XCDocsSupport
 
-@Suite("VectorSearchHit") struct VectorSearchHitTests {
-    @Test func mapsComputedPropertiesFromAttributes() {
+@Suite("VectorSearchHit")
+struct VectorSearchHitTests {
+    @Test
+    func mapsComputedPropertiesFromAttributes() {
         let hit = VectorSearchHit(
             identifier: "/documentation/Testing",
             score: 0.75,
@@ -20,7 +22,8 @@ import Testing
         #expect(hit.content == "Create and run tests.")
     }
 
-    @Test func roundTripsThroughCodable() throws {
+    @Test
+    func roundTripsThroughCodable() throws {
         let original = VectorSearchHit(
             identifier: "/documentation/Testing",
             score: 0.75,

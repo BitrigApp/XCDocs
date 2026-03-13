@@ -7,32 +7,38 @@ import XCDocs
 
 @Suite("XCDocs Client Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized)
 struct ClientIntegrationTests {
-    @Test func searchReturnsResultsForALiveQuery() async throws {
+    @Test
+    func searchReturnsResultsForALiveQuery() async throws {
         guard #available(macOS 26, *) else { return }
         try await searchReturnsResultsForALiveQueryOnSupportedOS()
     }
 
-    @Test func frameworkFilteringWorksEndToEnd() async throws {
+    @Test
+    func frameworkFilteringWorksEndToEnd() async throws {
         guard #available(macOS 26, *) else { return }
         try await frameworkFilteringWorksEndToEndOnSupportedOS()
     }
 
-    @Test func kindFilteringWorksEndToEnd() async throws {
+    @Test
+    func kindFilteringWorksEndToEnd() async throws {
         guard #available(macOS 26, *) else { return }
         try await kindFilteringWorksEndToEndOnSupportedOS()
     }
 
-    @Test func includeContentIsReflectedInMappedSearchResults() async throws {
+    @Test
+    func includeContentIsReflectedInMappedSearchResults() async throws {
         guard #available(macOS 26, *) else { return }
         try await includeContentIsReflectedInMappedSearchResultsOnSupportedOS()
     }
 
-    @Test func fetchReturnsExpectedMetadataAndContent() throws {
+    @Test
+    func fetchReturnsExpectedMetadataAndContent() throws {
         guard #available(macOS 26, *) else { return }
         try fetchReturnsExpectedMetadataAndContentOnSupportedOS()
     }
 
-    @Test func missingIdentifiersThrowAssetNotFoundBridgeErrors() throws {
+    @Test
+    func missingIdentifiersThrowAssetNotFoundBridgeErrors() throws {
         guard #available(macOS 26, *) else { return }
         try missingIdentifiersThrowAssetNotFoundBridgeErrorsOnSupportedOS()
     }

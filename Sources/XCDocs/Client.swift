@@ -8,7 +8,8 @@ import XCDocsSupport
 /// `Client` locates the on-disk documentation asset that ships with Xcode and macOS,
 /// generates semantic query embeddings using Apple's private embedding service, and
 /// resolves search results into stable Swift value types.
-@available(macOS 26, *) public struct Client {
+@available(macOS 26, *)
+public struct Client {
     /// Creates a client for interacting with the local documentation asset.
     public init() {}
 

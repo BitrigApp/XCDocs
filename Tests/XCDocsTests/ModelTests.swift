@@ -2,8 +2,10 @@ import Foundation
 import Testing
 import XCDocs
 
-@Suite("XCDocs Models") struct ModelTests {
-    @Test func publicModelsRoundTripThroughCodable() throws {
+@Suite("XCDocs Models")
+struct ModelTests {
+    @Test
+    func publicModelsRoundTripThroughCodable() throws {
         guard #available(macOS 26, *) else { return }
         try publicModelsRoundTripThroughCodableOnSupportedOS()
     }
