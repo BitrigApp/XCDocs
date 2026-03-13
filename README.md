@@ -8,38 +8,43 @@ The `xcdocs` CLI is designed for use by agents, like Bitrig's agent, Codex, or C
 
 ## Availability
 
-XCDocs targets macOS 26 and requires Apple Silicon (`arm64`).
+- macOS 26+
+- Apple silicon only
+- Xcode 26.3 RC or above has to be installed, but you don't need Xcode open.
 
-It has been tested on Xcode 26.3 RC and above on macOS 26.
+## Install
 
-## Build
+Ask your agent to help!
+
+#### Recommended
+
+Download the CLI from [Releases](releases) and put it in `/usr/local/bin`.
+
+#### Alternative
+
+You can also clone the repo and run `swift build` yourself. The resulting binary will be in `.build/debug/xcdocs`.
+
+## Usage
 
 ```bash
-swift build
-swift run xcdocs --help
-```
-
-## CLI
-
-```bash
-swift run xcdocs --help
+xcdocs --help
 ```
 
 Search for documentation:
 
 ```bash
-swift run xcdocs search "swift testing"
-swift run xcdocs search "swift testing" --framework "Swift Testing" --limit 5
-swift run xcdocs search "swift testing" --kind article --limit 5
-swift run xcdocs search "swiftui color" --json
-swift run xcdocs search "swiftui color" --omit-content
+xcdocs search "swift testing"
+xcdocs search "swift testing" --framework "Swift Testing" --limit 5
+xcdocs search "swift testing" --kind article --limit 5
+xcdocs search "swiftui color" --json
+xcdocs search "swiftui color" --omit-content
 ```
 
 Get an entry by identifier:
 
 ```bash
-swift run xcdocs get /documentation/Testing
-swift run xcdocs get /documentation/Testing --json
+xcdocs get /documentation/Testing
+xcdocs get /documentation/Testing --json
 ```
 
 ## Swift API
