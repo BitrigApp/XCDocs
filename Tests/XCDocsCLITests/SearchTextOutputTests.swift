@@ -4,7 +4,7 @@ import XCDocs
 
 @testable import XCDocsCLI
 
-@Suite("Search Text Output")
+@Suite("Search Text Output", .serialized)
 struct SearchTextOutputTests {
     @Test
     func searchResultUsesExpandedMetadataLayout() throws {
@@ -23,6 +23,12 @@ struct SearchTextOutputTests {
         guard #available(macOS 26, *) else { return }
         try assertGetOutputUsesNoLeadingIndentation()
     }
+
+    @Test
+    func outputIncludesFrameworkMetadataWhenPresent() throws {
+        guard #available(macOS 26, *) else { return }
+        try assertOutputIncludesFrameworkMetadataWhenPresent()
+    }
 }
 
 @available(macOS 26, *)
@@ -38,7 +44,8 @@ private func assertSearchResultUsesExpandedMetadataLayout() throws {
     }
 
     let expectedOutput = [
-        bold("1. init(red:green:blue:alpha:)"), "   \(bold("Kind:")) symbol", "   \(bold("Relevance:")) 0.5405",
+        bold("1. init(red:green:blue:alpha:)"), "   \(bold("Framework:")) Metal", "   \(bold("Kind:")) symbol",
+        "   \(bold("Relevance:")) 0.5405",
         "   \(bold("ID:")) /documentation/Metal/MTLClearColor/init(red:green:blue:alpha:)", "", "   [content]", "", "",
     ].joined(separator: "\n")
 
@@ -54,8 +61,9 @@ private func assertSearchResultAlignsMetadataWithDoubleDigitIndex() throws {
     }
 
     let expectedBlock = [
-        bold("12. Result 12"), "    \(bold("Kind:")) symbol", "    \(bold("Relevance:")) 0.5120",
-        "    \(bold("ID:")) /documentation/Testing/result-12", "", "    [content]", "", "",
+        bold("12. Result 12"), "    \(bold("Framework:")) Metal", "    \(bold("Kind:")) symbol",
+        "    \(bold("Relevance:")) 0.5120", "    \(bold("ID:")) /documentation/Testing/result-12", "", "    [content]",
+        "", "",
     ].joined(separator: "\n")
 
     #expect(output.contains(expectedBlock))
@@ -74,11 +82,20 @@ private func assertGetOutputUsesNoLeadingIndentation() throws {
     let output = try withEnvironment(variable: "CLICOLOR_FORCE", value: "1") { renderTextEntry(entry) }
 
     let expectedOutput = [
-        bold("init(red:green:blue:alpha:)"), "\(bold("Kind:")) symbol",
+        bold("init(red:green:blue:alpha:)"), "\(bold("Framework:")) Metal", "\(bold("Kind:")) symbol",
         "\(bold("ID:")) /documentation/Metal/MTLClearColor/init(red:green:blue:alpha:)", "", "[content]", "", "",
     ].joined(separator: "\n")
 
     #expect(output == expectedOutput)
+}
+
+@available(macOS 26, *)
+private func assertOutputIncludesFrameworkMetadataWhenPresent() throws {
+    let entry = DocumentationEntry(id: "/documentation/Metal", framework: "Metal", kind: nil, title: nil, content: nil)
+
+    let output = try withEnvironment(variable: "CLICOLOR_FORCE", value: "1") { renderTextEntry(entry) }
+
+    #expect(output.contains("\n\(bold("Framework:")) Metal\n"))
 }
 
 @available(macOS 26, *)
