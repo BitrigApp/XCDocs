@@ -25,7 +25,7 @@ let package = Package(
         ),
         .package(
             url: "https://github.com/swiftlang/swift-subprocess.git",
-            branch: "main"
+            from: "0.3.0"
         ),
     ],
     targets: [
