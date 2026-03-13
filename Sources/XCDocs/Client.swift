@@ -111,7 +111,7 @@ public struct Client {
                 }
                 let count =
                     result.elementCount > 0
-                        ? result.elementCount : result.embeddingData.count / MemoryLayout<UInt16>.size
+                    ? result.elementCount : result.embeddingData.count / MemoryLayout<UInt16>.size
                 continuation.resume(returning: (result.embeddingData, count))
             }
             let completionHandlerObject = completionHandler as AnyObject
