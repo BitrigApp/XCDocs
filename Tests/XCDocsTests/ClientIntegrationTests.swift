@@ -103,14 +103,3 @@ private func missingIdentifiersThrowAssetNotFoundBridgeErrorsOnSupportedOS() thr
     #expect(error.code == .assetNotFound)
     #expect(error.message.contains("/documentation/DefinitelyNotReal"))
 }
-
-private func captureBridgeError<T>(_ work: () throws -> T) -> BridgeError? {
-    do {
-        _ = try work()
-        Issue.record("Expected BridgeError to be thrown.")
-        return nil
-    } catch let error as BridgeError { return error } catch {
-        Issue.record("Unexpected error: \(String(describing: error))")
-        return nil
-    }
-}

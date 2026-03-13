@@ -142,17 +142,6 @@ struct DocumentationAssetLocatorLiveSmokeTests {
     }
 }
 
-private func captureBridgeError<T>(_ work: () throws -> T) -> BridgeError? {
-    do {
-        _ = try work()
-        Issue.record("Expected BridgeError to be thrown.")
-        return nil
-    } catch let error as BridgeError { return error } catch {
-        Issue.record("Unexpected error: \(String(describing: error))")
-        return nil
-    }
-}
-
 private func makeTemporaryDirectory() throws -> URL {
     let directoryURL = FileManager.default.temporaryDirectory.appendingPathComponent(
         UUID().uuidString,

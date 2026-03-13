@@ -75,5 +75,5 @@ private func printDocumentationSearchJSON(_ results: [SearchResult]) throws {
         init(searchResults: [SearchResult]) { self.documents = searchResults.map(DocumentationSearchDocument.init) }
     }
 
-    try printCompactJSON(DocumentationSearchResponse(searchResults: results))
+    try printJSON(DocumentationSearchResponse(searchResults: results), prettyPrinted: false)
 }

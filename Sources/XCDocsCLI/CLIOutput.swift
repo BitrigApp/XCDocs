@@ -2,18 +2,9 @@ import ArgumentParser
 import Foundation
 import XCDocs
 
-func printJSON<T: Encodable>(_ value: T) throws {
+func printJSON<T: Encodable>(_ value: T, prettyPrinted: Bool = true) throws {
     let encoder = JSONEncoder()
-    encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-    let data = try encoder.encode(value)
-    guard let string = String(data: data, encoding: .utf8) else {
-        throw ValidationError("Failed to render JSON output.")
-    }
-    print(string)
-}
-
-func printCompactJSON<T: Encodable>(_ value: T) throws {
-    let encoder = JSONEncoder()
+    if prettyPrinted { encoder.outputFormatting = [.prettyPrinted, .sortedKeys] }
     let data = try encoder.encode(value)
     guard let string = String(data: data, encoding: .utf8) else {
         throw ValidationError("Failed to render JSON output.")
