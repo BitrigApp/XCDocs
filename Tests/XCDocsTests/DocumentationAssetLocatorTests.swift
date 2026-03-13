@@ -164,6 +164,14 @@ struct DocumentationAssetLocatorTests {
     }
 
     @Test
+    func propagatesErrorWhenModificationDateLookupFails() throws {
+        let nonexistentURL = URL(fileURLWithPath: "/tmp/nonexistent-\(UUID().uuidString).asset")
+        let locator = DocumentationAssetLocator()
+
+        #expect(throws: (any Error).self) { try locator.modificationDate(for: nonexistentURL) }
+    }
+
+    @Test
     func selectsTheNewestValidAsset() throws {
         let rootURL = try makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: rootURL) }
