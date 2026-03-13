@@ -15,7 +15,7 @@ struct DocumentationAssetLocatorTests {
         )
 
         let error = try #require(
-            captureBridgeError { try DocumentationAssetLocator(assetRootURL: rootURL).locateDatabaseDirectoryURL() }
+            captureBridgeError { try DocumentationAssetLocator(assetRootURL: rootURL).databaseDirectoryURL() }
         )
 
         #expect(error.code == .assetNotFound)
@@ -38,7 +38,7 @@ struct DocumentationAssetLocatorTests {
         )
 
         do {
-            _ = try locator.locateDatabaseDirectoryURL()
+            _ = try locator.databaseDirectoryURL()
             Issue.record("Expected non-missing filesystem error to be rethrown.")
         } catch let error as BridgeError {
             Issue.record("Expected underlying filesystem error, got BridgeError: \(error)")
@@ -69,7 +69,7 @@ struct DocumentationAssetLocatorTests {
         try FileManager.default.setAttributes([.posixPermissions: 0o000], ofItemAtPath: indexURL.path)
 
         do {
-            _ = try DocumentationAssetLocator(assetRootURL: rootURL).locateDatabaseDirectoryURL()
+            _ = try DocumentationAssetLocator(assetRootURL: rootURL).databaseDirectoryURL()
             Issue.record("Expected unreadable index error to be rethrown.")
         } catch let error as BridgeError {
             Issue.record("Expected underlying filesystem error, got BridgeError: \(error)")
@@ -99,7 +99,7 @@ struct DocumentationAssetLocatorTests {
         )
 
         let locator = DocumentationAssetLocator(assetRootURL: rootURL)
-        let databaseDirectoryURL = try locator.locateDatabaseDirectoryURL()
+        let databaseDirectoryURL = try locator.databaseDirectoryURL()
 
         #expect(canonicalFileURL(databaseDirectoryURL) == canonicalFileURL(olderValidDatabaseURL))
     }
@@ -117,7 +117,7 @@ struct DocumentationAssetLocatorTests {
         )
 
         let locator = DocumentationAssetLocator(assetRootURL: rootURL)
-        let result = try locator.locateDatabaseDirectoryURL()
+        let result = try locator.databaseDirectoryURL()
 
         #expect(canonicalFileURL(result) == canonicalFileURL(databaseURL))
     }
@@ -134,7 +134,7 @@ struct DocumentationAssetLocatorTests {
         let dbB = try createAsset(at: assetBURL, includesIndex: true, modificationDate: timestamp)
 
         let locator = DocumentationAssetLocator(assetRootURL: rootURL)
-        let result = try locator.locateDatabaseDirectoryURL()
+        let result = try locator.databaseDirectoryURL()
         let canonical = canonicalFileURL(result)
 
         #expect(canonical == canonicalFileURL(dbA) || canonical == canonicalFileURL(dbB))
@@ -157,7 +157,7 @@ struct DocumentationAssetLocatorTests {
         )
 
         let error = try #require(
-            captureBridgeError { try DocumentationAssetLocator(assetRootURL: rootURL).locateDatabaseDirectoryURL() }
+            captureBridgeError { try DocumentationAssetLocator(assetRootURL: rootURL).databaseDirectoryURL() }
         )
 
         #expect(error.code == .assetNotFound)
@@ -190,7 +190,7 @@ struct DocumentationAssetLocatorTests {
         )
 
         let locator = DocumentationAssetLocator(assetRootURL: rootURL)
-        let databaseDirectoryURL = try locator.locateDatabaseDirectoryURL()
+        let databaseDirectoryURL = try locator.databaseDirectoryURL()
 
         #expect(canonicalFileURL(databaseDirectoryURL) == canonicalFileURL(newerDatabaseURL))
     }
@@ -200,7 +200,7 @@ struct DocumentationAssetLocatorTests {
 struct DocumentationAssetLocatorLiveSmokeTests {
     @Test
     func resolvesALiveDatabaseDirectoryContainingIndexSQL() throws {
-        let databaseDirectoryURL = try DocumentationAssetLocator().locateDatabaseDirectoryURL()
+        let databaseDirectoryURL = try DocumentationAssetLocator().databaseDirectoryURL()
         let indexURL = databaseDirectoryURL.appendingPathComponent("index.sql")
 
         #expect(FileManager.default.fileExists(atPath: databaseDirectoryURL.path))

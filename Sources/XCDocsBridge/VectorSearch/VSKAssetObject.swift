@@ -2,7 +2,7 @@ import Foundation
 
 package struct VSKAssetObject: PrivateObject {
     enum Key: String {
-        case stringIdentifier
+        case identifier = "stringIdentifier"
         case attributes
     }
 
@@ -10,7 +10,7 @@ package struct VSKAssetObject: PrivateObject {
 
     init(base: AnyObject) { self.base = base }
 
-    package var stringIdentifier: String { value(forKey: .stringIdentifier, as: String.self, default: "") }
+    package var identifier: String { value(forKey: .identifier, as: String.self, default: "") }
 
     package var attributes: [String: String] {
         guard let attributeDictionary = value(forKey: .attributes, as: NSDictionary.self) else { return [:] }

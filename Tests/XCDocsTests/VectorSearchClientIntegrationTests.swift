@@ -7,9 +7,9 @@ import Testing
 @Suite("VectorSearchClient Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized)
 struct VectorSearchClientIntegrationTests {
     @Test
-    func fetchReturnsTheExpectedEntry() async throws {
+    func entryReturnsTheExpectedEntry() async throws {
         let client = try await makeClient()
-        let hit = try await client.fetch(identifier: LiveEnvironment.documentationIdentifier)
+        let hit = try await client.entry(for: LiveEnvironment.documentationIdentifier)
 
         #expect(hit.identifier == LiveEnvironment.documentationIdentifier)
         #expect(hit.framework == LiveEnvironment.searchFramework)
@@ -54,7 +54,7 @@ struct VectorSearchClientIntegrationTests {
         )
 
         #expect(!hits.isEmpty)
-        #expect(hits.allSatisfy { $0.type == "article" })
+        #expect(hits.allSatisfy { $0.kind == "article" })
     }
 
     @Test

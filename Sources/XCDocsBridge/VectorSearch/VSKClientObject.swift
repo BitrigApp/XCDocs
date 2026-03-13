@@ -36,14 +36,14 @@ package final class VSKClientObject: PrivateObject {
 
     package func search(
         vector: Data,
-        stringIdentifiers: [String]?,
+        identifiers: [String]?,
         attributeFilters: [VSKFilterObject],
-        selectAttributes: [VSKAttributeObject],
+        selectedAttributes: [VSKAttributeObject],
         limit: Int,
         fullScan: Bool,
         numberOfProbes: Int,
         batchSize: Int,
-        numConcurrentReaders: Int
+        concurrentReaders: Int
     ) throws -> [VSKSearchResultObject] {
         guard let method = objcInstanceMethod(selector: Self.searchByVectorSelector, as: VSKSearchByVectorMethod.self)
         else { throw BridgeError(.selectorUnavailable, "Missing search selector on VSKClient") }
@@ -53,15 +53,15 @@ package final class VSKClientObject: PrivateObject {
             base,
             Self.searchByVectorSelector,
             vector as NSData,
-            stringIdentifiers?.map { $0 as NSString } as NSArray?,
+            identifiers?.map { $0 as NSString } as NSArray?,
             attributeFilters.isEmpty ? nil : attributeFilters.map(\.base) as NSArray,
-            selectAttributes.isEmpty ? nil : selectAttributes.map(\.base) as NSArray,
+            selectedAttributes.isEmpty ? nil : selectedAttributes.map(\.base) as NSArray,
             Int32(limit),
             fullScan,
             false,
             NSNumber(value: numberOfProbes),
             NSNumber(value: batchSize),
-            NSNumber(value: numConcurrentReaders),
+            NSNumber(value: concurrentReaders),
             &errorObject
         )
 
@@ -76,11 +76,11 @@ package final class VSKClientObject: PrivateObject {
         return results.map(VSKSearchResultObject.init(base:))
     }
 
-    package func stringIdentifiedAssets(
-        identifiers: [String],
+    package func assets(
+        forIdentifiers identifiers: [String],
         attributeFilters: [VSKFilterObject],
         includeVectors: Bool,
-        selectAttributes: [VSKAttributeObject]
+        selectedAttributes: [VSKAttributeObject]
     ) throws -> [VSKAssetObject] {
         guard
             let method = objcInstanceMethod(
@@ -97,7 +97,7 @@ package final class VSKClientObject: PrivateObject {
             attributeFilters.isEmpty ? nil : attributeFilters.map(\.base) as NSArray,
             nil,
             includeVectors,
-            selectAttributes.isEmpty ? nil : selectAttributes.map(\.base) as NSArray,
+            selectedAttributes.isEmpty ? nil : selectedAttributes.map(\.base) as NSArray,
             &errorObject
         )
 
@@ -112,18 +112,18 @@ package final class VSKClientObject: PrivateObject {
         return assets.map(VSKAssetObject.init(base:))
     }
 
-    package func requiredStringIdentifiedAsset(
-        identifier: String,
+    package func asset(
+        forIdentifier identifier: String,
         attributeFilters: [VSKFilterObject],
         includeVectors: Bool,
-        selectAttributes: [VSKAttributeObject]
+        selectedAttributes: [VSKAttributeObject]
     ) throws -> VSKAssetObject {
         guard
-            let asset = try stringIdentifiedAssets(
-                identifiers: [identifier],
+            let asset = try assets(
+                forIdentifiers: [identifier],
                 attributeFilters: attributeFilters,
                 includeVectors: includeVectors,
-                selectAttributes: selectAttributes
+                selectedAttributes: selectedAttributes
             ).first
         else { throw BridgeError(.assetNotFound, "No documentation entry was found for \(identifier)") }
 

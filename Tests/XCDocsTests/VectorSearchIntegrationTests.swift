@@ -26,19 +26,19 @@ struct VectorSearchIntegrationTests {
             readOnly: true
         )
         let client = try await VSKClientObject(config: config)
-        let frameworkAttribute = try await VSKAttributeObject.stringNamed("framework")
-        let titleAttribute = try await VSKAttributeObject.stringNamed("title")
+        let frameworkAttribute = try await VSKAttributeObject.stringAttribute(named: "framework")
+        let titleAttribute = try await VSKAttributeObject.stringAttribute(named: "title")
         let attributes = [frameworkAttribute, titleAttribute]
 
-        let assets = try await client.stringIdentifiedAssets(
-            identifiers: [LiveEnvironment.documentationIdentifier],
+        let assets = try await client.assets(
+            forIdentifiers: [LiveEnvironment.documentationIdentifier],
             attributeFilters: [],
             includeVectors: false,
-            selectAttributes: attributes
+            selectedAttributes: attributes
         )
 
         let asset = try #require(assets.first)
-        let identifier = await asset.stringIdentifier
+        let identifier = await asset.identifier
         let assetAttributes = await asset.attributes
 
         #expect(identifier == LiveEnvironment.documentationIdentifier)

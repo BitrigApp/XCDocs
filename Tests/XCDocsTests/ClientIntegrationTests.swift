@@ -32,9 +32,9 @@ struct ClientIntegrationTests {
     }
 
     @Test
-    func fetchReturnsExpectedMetadataAndContent() async throws {
+    func entryReturnsExpectedMetadataAndContent() async throws {
         guard #available(macOS 26, *) else { return }
-        try await fetchReturnsExpectedMetadataAndContentOnSupportedOS()
+        try await entryReturnsExpectedMetadataAndContentOnSupportedOS()
     }
 
     @Test
@@ -85,9 +85,9 @@ private func omitContentIsReflectedInMappedSearchResultsOnSupportedOS() async th
 }
 
 @available(macOS 26, *)
-private func fetchReturnsExpectedMetadataAndContentOnSupportedOS() async throws {
+private func entryReturnsExpectedMetadataAndContentOnSupportedOS() async throws {
     let client = Client()
-    let result = try await client.fetch(LiveEnvironment.documentationIdentifier)
+    let result = try await client.entry(for: LiveEnvironment.documentationIdentifier)
 
     #expect(result.id == LiveEnvironment.documentationIdentifier)
     #expect(result.framework == LiveEnvironment.searchFramework)
@@ -98,7 +98,9 @@ private func fetchReturnsExpectedMetadataAndContentOnSupportedOS() async throws 
 @available(macOS 26, *)
 private func missingIdentifiersThrowAssetNotFoundBridgeErrorsOnSupportedOS() async throws {
     let client = Client()
-    let error = try #require(await captureBridgeError { try await client.fetch("/documentation/DefinitelyNotReal") })
+    let error = try #require(
+        await captureBridgeError { try await client.entry(for: "/documentation/DefinitelyNotReal") }
+    )
 
     #expect(error.code == .assetNotFound)
     #expect(error.message.contains("/documentation/DefinitelyNotReal"))

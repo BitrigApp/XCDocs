@@ -28,21 +28,22 @@ package final class VectorSearchClient {
         let kindFilters = try await makeFilters(attributeName: "type", values: kinds)
         let filters = frameworkFilters + kindFilters
         var selectedAttributes = [
-            try await VSKAttributeObject.stringNamed("framework"), try await VSKAttributeObject.stringNamed("type"),
-            try await VSKAttributeObject.stringNamed("title"),
+            try await VSKAttributeObject.stringAttribute(named: "framework"),
+            try await VSKAttributeObject.stringAttribute(named: "type"),
+            try await VSKAttributeObject.stringAttribute(named: "title"),
         ]
-        if !omitContent { selectedAttributes.append(try await VSKAttributeObject.stringNamed("content")) }
+        if !omitContent { selectedAttributes.append(try await VSKAttributeObject.stringAttribute(named: "content")) }
 
         let rawResults = try await client.search(
             vector: vector,
-            stringIdentifiers: nil,
+            identifiers: nil,
             attributeFilters: filters,
-            selectAttributes: selectedAttributes,
+            selectedAttributes: selectedAttributes,
             limit: limit,
             fullScan: true,
             numberOfProbes: SearchConfiguration.numberOfProbes,
             batchSize: SearchConfiguration.batchSize,
-            numConcurrentReaders: SearchConfiguration.concurrentReaders
+            concurrentReaders: SearchConfiguration.concurrentReaders
         )
 
         var hits: [VectorSearchHit] = []
@@ -50,7 +51,7 @@ package final class VectorSearchClient {
         for result in rawResults {
             hits.append(
                 try await VectorSearchHit(
-                    identifier: result.stringIdentifier,
+                    identifier: result.identifier,
                     score: result.score,
                     attributes: result.attributes
                 )
@@ -60,20 +61,22 @@ package final class VectorSearchClient {
         return try await hydrateSearchHits(hits, selectedAttributes: selectedAttributes)
     }
 
-    package func fetch(identifier: String) async throws -> VectorSearchHit {
+    package func entry(for identifier: String) async throws -> VectorSearchHit {
         let selectedAttributes = [
-            try await VSKAttributeObject.stringNamed("framework"), try await VSKAttributeObject.stringNamed("type"),
-            try await VSKAttributeObject.stringNamed("title"), try await VSKAttributeObject.stringNamed("content"),
+            try await VSKAttributeObject.stringAttribute(named: "framework"),
+            try await VSKAttributeObject.stringAttribute(named: "type"),
+            try await VSKAttributeObject.stringAttribute(named: "title"),
+            try await VSKAttributeObject.stringAttribute(named: "content"),
         ]
 
-        let asset = try await client.requiredStringIdentifiedAsset(
-            identifier: identifier,
+        let asset = try await client.asset(
+            forIdentifier: identifier,
             attributeFilters: [],
             includeVectors: false,
-            selectAttributes: selectedAttributes
+            selectedAttributes: selectedAttributes
         )
 
-        return await VectorSearchHit(identifier: asset.stringIdentifier, score: .nan, attributes: asset.attributes)
+        return await VectorSearchHit(identifier: asset.identifier, score: .nan, attributes: asset.attributes)
     }
 
     // MARK: Private
@@ -83,17 +86,12 @@ package final class VectorSearchClient {
 
         guard !normalizedValues.isEmpty else { return [] }
 
-        let attribute = try await VSKAttributeObject.stringNamed(attributeName)
+        let attribute = try await VSKAttributeObject.stringAttribute(named: attributeName)
         var disjunctiveFilters: [VSKDisjunctiveFilterObject] = []
         disjunctiveFilters.reserveCapacity(normalizedValues.count)
         for value in normalizedValues {
             let databaseValue = try await VSKDatabaseValueObject(string: value)
-            disjunctiveFilters.append(
-                try await VSKDisjunctiveFilterObject(
-                    operatorRawValue: VSKFilterOperator.equals.rawValue,
-                    value: databaseValue
-                )
-            )
+            disjunctiveFilters.append(try await VSKDisjunctiveFilterObject(operator: .equals, value: databaseValue))
         }
 
         return [try await VSKFilterObject(attribute: attribute, disjunctiveFilters: disjunctiveFilters)]
@@ -118,15 +116,15 @@ package final class VectorSearchClient {
 
         guard !incompleteIdentifiers.isEmpty else { return hits }
 
-        let hydratedAssets = try await client.stringIdentifiedAssets(
-            identifiers: incompleteIdentifiers,
+        let hydratedAssets = try await client.assets(
+            forIdentifiers: incompleteIdentifiers,
             attributeFilters: [],
             includeVectors: false,
-            selectAttributes: selectedAttributes
+            selectedAttributes: selectedAttributes
         )
         var attributesByIdentifier: [String: [String: String]] = [:]
         for asset in hydratedAssets {
-            let identifier = await asset.stringIdentifier
+            let identifier = await asset.identifier
             let attributes = await asset.attributes
             attributesByIdentifier[identifier] = attributes.merging(attributesByIdentifier[identifier] ?? [:]) {
                 hydratedValue,

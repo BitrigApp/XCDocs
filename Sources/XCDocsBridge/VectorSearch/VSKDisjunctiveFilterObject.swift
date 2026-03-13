@@ -3,7 +3,7 @@ import Foundation
 package struct VSKDisjunctiveFilterObject: PrivateObject {
     let base: AnyObject
 
-    package init(operatorRawValue: Int64, value: VSKDatabaseValueObject) throws {
+    package init(operator filterOperator: VSKFilterOperator, value: VSKDatabaseValueObject) throws {
         try FrameworkLoader.loadVectorSearch()
 
         let cls: AnyClass = try Self.requiredClass(named: "VSKDisjunctiveFilter")
@@ -16,7 +16,7 @@ package struct VSKDisjunctiveFilterObject: PrivateObject {
             )
         else { throw BridgeError(.selectorUnavailable, "Missing -initWithOperator:value: on VSKDisjunctiveFilter") }
 
-        guard let object = initialize(rawObject, Self.initSelector, operatorRawValue, value.base) else {
+        guard let object = initialize(rawObject, Self.initSelector, filterOperator.rawValue, value.base) else {
             throw BridgeError(.operationFailed, "Failed to create VSKDisjunctiveFilter")
         }
 

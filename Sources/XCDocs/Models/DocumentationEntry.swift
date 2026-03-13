@@ -1,6 +1,6 @@
 import Foundation
 
-/// A single documentation entry returned from `Client.fetch`.
+/// A single documentation entry returned from `Client.entry(for:)`.
 @available(macOS 26, *)
 public struct DocumentationEntry: Codable, Hashable, Identifiable, Sendable {
     /// The stable documentation identifier for the entry.
@@ -18,7 +18,7 @@ public struct DocumentationEntry: Codable, Hashable, Identifiable, Sendable {
     /// The full rendered content for the entry, if present.
     public let content: String?
 
-    /// Creates a fetched documentation result.
+    /// Creates a documentation entry.
     ///
     /// - Parameters:
     ///   - id: The stable documentation identifier for the entry.

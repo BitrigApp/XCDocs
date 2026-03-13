@@ -17,7 +17,7 @@ struct VectorSearchHitTests {
         )
 
         #expect(hit.framework == "Swift Testing")
-        #expect(hit.type == "article")
+        #expect(hit.kind == "article")
         #expect(hit.title == "Swift Testing")
         #expect(hit.content == "Create and run tests.")
     }
@@ -32,7 +32,7 @@ struct VectorSearchHitTests {
 
         #expect(hit.content == nil)
         #expect(hit.title == nil)
-        #expect(hit.type == nil)
+        #expect(hit.kind == nil)
     }
 
     @Test
@@ -44,7 +44,7 @@ struct VectorSearchHitTests {
         )
 
         #expect(hit.framework == "")
-        #expect(hit.type == "")
+        #expect(hit.kind == "")
         #expect(hit.title == "")
         #expect(hit.content == "")
     }
@@ -61,7 +61,7 @@ struct VectorSearchHitTests {
         #expect(hit.score == 0.5)
         #expect(hit.framework == nil)
         #expect(hit.title == nil)
-        #expect(hit.type == nil)
+        #expect(hit.kind == nil)
         #expect(hit.content == nil)
     }
 
