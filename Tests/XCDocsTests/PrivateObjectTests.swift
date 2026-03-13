@@ -58,7 +58,11 @@ struct PrivateObjectTests {
     func returnsNilForNonExistentClassSelector() {
         let bogusSelector = NSSelectorFromString("totallyBogusClassMethod")
 
-        let result = FixtureWrapper.objcClassMethod(KeyValueFixture.self, selector: bogusSelector, as: ClassNumberGetter.self)
+        let result = FixtureWrapper.objcClassMethod(
+            KeyValueFixture.self,
+            selector: bogusSelector,
+            as: ClassNumberGetter.self
+        )
         #expect(result == nil)
     }
 

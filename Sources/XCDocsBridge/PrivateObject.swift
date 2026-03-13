@@ -43,7 +43,9 @@ extension PrivateObject {
 
         let imp = base.method(for: selector)
         guard MemoryLayout<T>.size == MemoryLayout<IMP>.size else {
-            logBitCastWarning("Type \(T.self) size (\(MemoryLayout<T>.size)) does not match IMP size (\(MemoryLayout<IMP>.size))")
+            logBitCastWarning(
+                "Type \(T.self) size (\(MemoryLayout<T>.size)) does not match IMP size (\(MemoryLayout<IMP>.size))"
+            )
             return nil
         }
         return unsafeBitCast(imp, to: T.self)
@@ -83,7 +85,9 @@ private func logBitCastWarning(_ message: String) {
 
 private func validatedCast<T>(_ imp: IMP, method: Method, to type: T.Type) -> T? {
     guard MemoryLayout<T>.size == MemoryLayout<IMP>.size else {
-        logBitCastWarning("Type \(T.self) size (\(MemoryLayout<T>.size)) does not match IMP size (\(MemoryLayout<IMP>.size))")
+        logBitCastWarning(
+            "Type \(T.self) size (\(MemoryLayout<T>.size)) does not match IMP size (\(MemoryLayout<IMP>.size))"
+        )
         return nil
     }
 
@@ -104,9 +108,7 @@ private func validatedCast<T>(_ imp: IMP, method: Method, to type: T.Type) -> T?
     if isVoidReturn {
         let typeName = String(describing: T.self)
         if !typeName.contains("Void") && !typeName.contains("()") {
-            logBitCastWarning(
-                "ObjC method returns void but cast target \(T.self) may expect a return value"
-            )
+            logBitCastWarning("ObjC method returns void but cast target \(T.self) may expect a return value")
         }
     }
 
