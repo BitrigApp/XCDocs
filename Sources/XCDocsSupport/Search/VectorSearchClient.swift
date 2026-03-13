@@ -19,7 +19,7 @@ package final class VectorSearchClient {
         self.client = try VSKClientObject(config: config)
     }
 
-    package func search(vector: Data, frameworks: [String], kinds: [String], limit: Int, includeContent: Bool) throws
+    package func search(vector: Data, frameworks: [String], kinds: [String], limit: Int, omitContent: Bool) throws
         -> [VectorSearchHit]
     {
         guard limit > 0 else { return [] }
@@ -31,7 +31,7 @@ package final class VectorSearchClient {
             try VSKAttributeObject.stringNamed("framework"), try VSKAttributeObject.stringNamed("type"),
             try VSKAttributeObject.stringNamed("title"),
         ]
-        if includeContent { selectedAttributes.append(try VSKAttributeObject.stringNamed("content")) }
+        if !omitContent { selectedAttributes.append(try VSKAttributeObject.stringNamed("content")) }
 
         let rawResults = try client.search(
             vector: vector,

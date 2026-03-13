@@ -25,8 +25,8 @@ public struct Client {
     ///   - query: The natural-language query text.
     ///   - frameworks: Optional framework filters to constrain the search.
     ///   - kinds: Optional kind filters to constrain the search.
-    ///   - maxResults: The maximum number of ranked matches to return.
-    ///   - includeContent: Whether to include full document contents in each result.
+    ///   - limit: The maximum number of ranked matches to return.
+    ///   - omitContent: Whether to omit full document contents from each result.
     /// - Returns: The ranked documentation search results.
     /// - Throws: An error if the local documentation asset cannot be found, if embedding
     ///   generation fails, or if the vector search backend returns an error.
@@ -34,8 +34,8 @@ public struct Client {
         _ query: String,
         frameworks: [String] = [],
         kinds: [DocumentationKind] = [],
-        maxResults: Int = 10,
-        includeContent: Bool = false
+        limit: Int = 10,
+        omitContent: Bool = true
     ) async throws -> [SearchResult] {
         let databaseDirectoryURL = try DocumentationAssetLocator().locateDatabaseDirectoryURL()
         let vector = try await embeddingVector(for: query)
@@ -46,8 +46,8 @@ public struct Client {
             vector: vector,
             frameworks: frameworks,
             kinds: kinds.map(\.rawValue),
-            limit: maxResults,
-            includeContent: includeContent
+            limit: limit,
+            omitContent: omitContent
         )
 
         return hits.map {
@@ -65,7 +65,7 @@ public struct Client {
     /// Fetches a single documentation entry by its stable documentation identifier.
     ///
     /// Use this when you already know the exact identifier for an entry, such as a path like
-    /// `/documentation/SwiftUI/Color`. Unlike `search(_:frameworks:kinds:maxResults:includeContent:)`,
+    /// `/documentation/SwiftUI/Color`. Unlike `search(_:frameworks:kinds:limit:omitContent:)`,
     /// this does not generate an embedding or run a semantic ranking step.
     ///
     /// - Parameter identifier: The identifier to resolve from the local documentation asset.
