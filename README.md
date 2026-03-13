@@ -2,11 +2,13 @@
 
 <img src="demo.gif" alt="Demo of the xcdocs CLI" width="720">
 
-**XCDocs** is a Swift package and CLI for Apple's developer documentation.
+**XCDocs lets your agents quickly search local Apple docs without keeping Xcode open!**
 
-It exposes the same data and functionality which powers Xcode's MCP tool, called `DocumentationSearch`.
+It uses the vector database powering Xcode's `DocumentationSearch` MCP tool under the hood, which is already on your Mac.
 
-The `xcdocs` CLI is designed for use by agents, like Bitrig's agent, Codex, or Claude Code.
+Includes:
+- `xcdocs` CLI & agent skill, designed for use by agents like Codex or Claude Code
+- Swift package, to integrate `XCDocs` into other tools
 
 ## Availability
 
