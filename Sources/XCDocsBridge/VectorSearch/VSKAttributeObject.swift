@@ -25,19 +25,19 @@ package struct VSKAttributeObject: PrivateObject {
         self.base = object
     }
 
-    package static func stringNamed(_ name: String) throws -> VSKAttributeObject {
+    package static func stringAttribute(named name: String) throws -> VSKAttributeObject {
         try VSKAttributeObject(name: name, columnType: VSKColumnTypeObject(defaultStringValue: ""))
     }
 
     package var name: String {
-        guard let getter = objcInstanceMethod(selector: Self.getNameSelector, as: VSKAttributeGetNameMethod.self) else {
+        guard let getter = objcInstanceMethod(selector: Self.nameSelector, as: VSKAttributeGetNameMethod.self) else {
             return ""
         }
-        return getter(base, Self.getNameSelector) as String? ?? ""
+        return getter(base, Self.nameSelector) as String? ?? ""
     }
 
     private static let initSelector = NSSelectorFromString("initWithName:columnType:")
-    private static let getNameSelector = NSSelectorFromString("getName")
+    private static let nameSelector = NSSelectorFromString("getName")
 }
 
 private typealias VSKAttributeInitMethod = @convention(c) (AnyObject, Selector, NSString, AnyObject) -> AnyObject?

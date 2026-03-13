@@ -11,7 +11,7 @@ struct ExecutableIntegrationTests {
         #expect(result.exitStatus == 0)
         #expect(result.stdout.contains("Search Apple developer documentation."))
         #expect(result.stdout.contains("search (default)"))
-        #expect(result.stdout.contains("fetch"))
+        #expect(result.stdout.contains("get"))
         #expect(result.stdout.contains("version"))
     }
 
@@ -57,8 +57,8 @@ struct ExecutableLiveIntegrationTests {
     }
 
     @Test
-    func fetchJSONContainsTheExpectedResultShape() async throws {
-        let result = try await ProcessRunner.runXCDocs(["fetch", LiveEnvironment.documentationIdentifier, "--json"])
+    func getJSONContainsTheExpectedResultShape() async throws {
+        let result = try await ProcessRunner.runXCDocs(["get", LiveEnvironment.documentationIdentifier, "--json"])
 
         let json = try dictionaryJSON(from: result.stdout)
 
@@ -70,7 +70,7 @@ struct ExecutableLiveIntegrationTests {
 
     @Test
     func missingIdentifiersReturnTheRepoDefinedErrorMessage() async throws {
-        let result = try await ProcessRunner.runXCDocs(["fetch", "/documentation/DefinitelyNotReal"])
+        let result = try await ProcessRunner.runXCDocs(["get", "/documentation/DefinitelyNotReal"])
 
         #expect(result.exitStatus == 1)
         #expect(

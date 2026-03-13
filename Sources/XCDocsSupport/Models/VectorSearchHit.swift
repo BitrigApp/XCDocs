@@ -13,7 +13,7 @@ package struct VectorSearchHit: Codable, Hashable, Sendable {
 
     package var framework: String? { attributes["framework"] }
 
-    package var type: String? { attributes["type"] }
+    package var kind: String? { attributes["type"] }
 
     package var title: String? { attributes["title"] }
 

@@ -35,11 +35,11 @@ swift run xcdocs search "swiftui color" --json
 swift run xcdocs search "swiftui color" --omit-content
 ```
 
-Fetch an entry by identifier:
+Get an entry by identifier:
 
 ```bash
-swift run xcdocs fetch /documentation/Testing
-swift run xcdocs fetch /documentation/Testing --json
+swift run xcdocs get /documentation/Testing
+swift run xcdocs get /documentation/Testing --json
 ```
 
 ## Swift API
@@ -57,8 +57,8 @@ let searchResults = try await client.search(
     omitContent: false
 )
 
-let entry = try await client.fetch(
-    "/documentation/Testing"
+let entry = try await client.entry(
+    for: "/documentation/Testing"
 )
 ```
 

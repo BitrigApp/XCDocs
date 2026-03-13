@@ -17,19 +17,17 @@ package enum LiveEnvironment {
         return fileManager.fileExists(atPath: mediaAnalysisServicesPath)
             && fileManager.fileExists(atPath: vectorSearchPath)
             && fileManager.fileExists(atPath: documentationAssetRootPath)
-            && ((try? DocumentationAssetLocator().locateDatabaseDirectoryURL()) != nil)
+            && ((try? DocumentationAssetLocator().databaseDirectoryURL()) != nil)
     }
 
-    package static func databaseDirectoryURL() throws -> URL {
-        try DocumentationAssetLocator().locateDatabaseDirectoryURL()
-    }
+    package static func databaseDirectoryURL() throws -> URL { try DocumentationAssetLocator().databaseDirectoryURL() }
 
     package static func embeddingVector(for text: String) async throws -> Data {
         let service = try await MADServiceObject()
         let request = try await MADTextEmbeddingRequestObject()
         let textInput = try await MADTextInputObject(text: text)
 
-        _ = try await service.performRequests(requests: [request], textInputs: [textInput])
+        _ = try await service.performRequests([request], textInputs: [textInput])
 
         return try await request.float32EmbeddingData()
     }

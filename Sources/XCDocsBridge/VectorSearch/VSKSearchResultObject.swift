@@ -2,8 +2,8 @@ import Foundation
 
 package struct VSKSearchResultObject: PrivateObject {
     enum Key: String {
-        case stringIdentifier
-        case value
+        case identifier = "stringIdentifier"
+        case score = "value"
         case attributes
     }
 
@@ -11,12 +11,12 @@ package struct VSKSearchResultObject: PrivateObject {
 
     init(base: AnyObject) { self.base = base }
 
-    package var stringIdentifier: String { value(forKey: .stringIdentifier, as: String.self, default: "") }
+    package var identifier: String { value(forKey: .identifier, as: String.self, default: "") }
 
     package var score: Double {
         get throws {
-            if let number: NSNumber = value(forKey: .value, as: NSNumber.self) { return number.doubleValue }
-            if let value: Double = value(forKey: .value, as: Double.self) { return value }
+            if let number: NSNumber = value(forKey: .score, as: NSNumber.self) { return number.doubleValue }
+            if let value: Double = value(forKey: .score, as: Double.self) { return value }
             throw BridgeError(.invalidScore, "Search result score could not be read as a numeric value")
         }
     }

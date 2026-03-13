@@ -2,7 +2,7 @@ import Foundation
 import XCDocsBridge
 import XCDocsSupport
 
-/// A high-level client for searching and fetching Apple's local developer documentation.
+/// A high-level client for searching and looking up Apple's local developer documentation.
 ///
 /// `Client` locates the on-disk documentation asset that ships with Xcode and macOS,
 /// generates semantic query embeddings using Apple's private embedding service, and
@@ -55,7 +55,7 @@ public final class Client {
                 entry: DocumentationEntry(
                     id: $0.identifier,
                     framework: $0.framework,
-                    kind: $0.type.flatMap(DocumentationKind.init(rawValue:)),
+                    kind: $0.kind.flatMap(DocumentationKind.init(rawValue:)),
                     title: $0.title,
                     content: $0.content
                 )
@@ -63,7 +63,7 @@ public final class Client {
         }
     }
 
-    /// Fetches a single documentation entry by its stable documentation identifier.
+    /// Returns the documentation entry for a stable documentation identifier.
     ///
     /// Use this when you already know the exact identifier for an entry, such as a path like
     /// `/documentation/SwiftUI/Color`. Unlike `search(_:frameworks:kinds:limit:omitContent:)`,
@@ -73,14 +73,14 @@ public final class Client {
     /// - Returns: The resolved documentation entry.
     /// - Throws: An error if the documentation asset cannot be found, if the identifier does
     ///   not exist, or if the underlying storage backend fails to load the entry.
-    public func fetch(_ identifier: String) async throws -> DocumentationEntry {
+    public func entry(for identifier: String) async throws -> DocumentationEntry {
         let searchClient = try await searchClient()
-        let result = try await searchClient.fetch(identifier: identifier)
+        let result = try await searchClient.entry(for: identifier)
 
         return DocumentationEntry(
             id: result.identifier,
             framework: result.framework,
-            kind: result.type.flatMap(DocumentationKind.init(rawValue:)),
+            kind: result.kind.flatMap(DocumentationKind.init(rawValue:)),
             title: result.title,
             content: result.content
         )
@@ -91,7 +91,7 @@ public final class Client {
     private func searchClient() async throws -> VectorSearchClient {
         if let cachedSearchClient { return cachedSearchClient }
 
-        let databaseDirectoryURL = try DocumentationAssetLocator().locateDatabaseDirectoryURL()
+        let databaseDirectoryURL = try DocumentationAssetLocator().databaseDirectoryURL()
         let client = try await VectorSearchClient(databaseDirectoryURL: databaseDirectoryURL, readOnly: true)
         cachedSearchClient = client
         return client
@@ -102,7 +102,7 @@ public final class Client {
         let request = try await MADTextEmbeddingRequestObject()
         let textInput = try await MADTextInputObject(text: text)
 
-        _ = try await service.performRequests(requests: [request], textInputs: [textInput])
+        _ = try await service.performRequests([request], textInputs: [textInput])
 
         return try await request.float32EmbeddingData()
     }

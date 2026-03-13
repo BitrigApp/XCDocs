@@ -24,7 +24,7 @@ package final class MADServiceObject: PrivateObject {
     }
 
     @discardableResult
-    package func performRequests(requests: [MADTextEmbeddingRequestObject], textInputs: [MADTextInputObject])
+    package func performRequests(_ requests: [MADTextEmbeddingRequestObject], textInputs: [MADTextInputObject])
         async throws -> Int32
     {
         var requestID: Int32 = 0
