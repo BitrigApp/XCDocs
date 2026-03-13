@@ -97,8 +97,23 @@ public struct Client {
         let request = try MADTextEmbeddingRequestObject()
         let textInput = try MADTextInputObject(text: text)
 
-        try await withCheckedThrowingContinuation { continuation in
-            let completionHandler: @convention(block) () -> Void = { continuation.resume() }
+        let (embeddingData, elementCount) = try await withCheckedThrowingContinuation {
+            (continuation: CheckedContinuation<(Data, Int), any Error>) in
+            let completionHandler: @convention(block) () -> Void = {
+                guard let result = request.embeddingResults.first, !result.embeddingData.isEmpty else {
+                    continuation.resume(
+                        throwing: BridgeError(
+                            .operationFailed,
+                            "MediaAnalysisServices completed without returning embedding data."
+                        )
+                    )
+                    return
+                }
+                let count =
+                    result.elementCount > 0
+                        ? result.elementCount : result.embeddingData.count / MemoryLayout<UInt16>.size
+                continuation.resume(returning: (result.embeddingData, count))
+            }
             let completionHandlerObject = completionHandler as AnyObject
 
             do {
@@ -112,13 +127,7 @@ public struct Client {
             } catch { continuation.resume(throwing: error) }
         }
 
-        guard let result = request.embeddingResults.first, !result.embeddingData.isEmpty else {
-            throw BridgeError(.operationFailed, "MediaAnalysisServices completed without returning embedding data.")
-        }
-
-        let elementCount =
-            result.elementCount > 0 ? result.elementCount : result.embeddingData.count / MemoryLayout<UInt16>.size
-        return try makeFloat32Data(from: result.embeddingData, expectedCount: elementCount)
+        return try makeFloat32Data(from: embeddingData, expectedCount: elementCount)
     }
 
     private func makeFloat32Data(from float16Data: Data, expectedCount: Int) throws -> Data {
