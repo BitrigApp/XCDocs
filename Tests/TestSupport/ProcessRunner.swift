@@ -7,22 +7,16 @@ import System
 import SystemPackage
 #endif
 
-package struct ProcessResult {
-    package let terminationStatusDescription: String
+package struct ProcessResult: Sendable {
+    package let terminationStatus: TerminationStatus
     package let stdout: String
     package let stderr: String
 
     package var exitStatus: Int32 {
-        guard terminationStatusDescription.hasPrefix("exited("), terminationStatusDescription.hasSuffix(")") else {
-            return -1
+        switch terminationStatus {
+        case .exited(let code): return code
+        case .unhandledException(let code): return code
         }
-
-        let startIndex = terminationStatusDescription.index(
-            terminationStatusDescription.startIndex,
-            offsetBy: "exited(".count
-        )
-        let endIndex = terminationStatusDescription.index(before: terminationStatusDescription.endIndex)
-        return Int32(terminationStatusDescription[startIndex..<endIndex]) ?? -1
     }
 
     package var combinedOutput: String { stdout + stderr }
@@ -40,7 +34,7 @@ package enum ProcessRunner {
         )
 
         return ProcessResult(
-            terminationStatusDescription: String(describing: result.terminationStatus),
+            terminationStatus: result.terminationStatus,
             stdout: result.standardOutput ?? "",
             stderr: result.standardError ?? ""
         )
