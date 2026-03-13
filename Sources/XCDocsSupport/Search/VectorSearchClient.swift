@@ -45,8 +45,8 @@ package final class VectorSearchClient {
             numConcurrentReaders: SearchConfiguration.concurrentReaders
         )
 
-        let hits = rawResults.map {
-            VectorSearchHit(identifier: $0.stringIdentifier, score: $0.score, attributes: $0.attributes)
+        let hits = try rawResults.map {
+            try VectorSearchHit(identifier: $0.stringIdentifier, score: $0.score, attributes: $0.attributes)
         }
 
         return try hydrateSearchHits(hits, selectedAttributes: selectedAttributes)
