@@ -15,22 +15,12 @@ package struct DocumentationAssetLocator {
     }
 
     package func locateDatabaseDirectoryURL() throws -> URL {
-        let contents: [URL]
-        do {
-            contents = try fileManager.contentsOfDirectory(
-                at: assetRootURL,
-                includingPropertiesForKeys: [.isDirectoryKey, .contentModificationDateKey],
-                options: [.skipsHiddenFiles]
-            )
-        } catch { throw BridgeError(.assetNotFound, "Documentation asset root is missing at \(assetRootURL.path)") }
+        let contents = try assetRootContents()
 
-        let candidates = contents.filter { $0.pathExtension == "asset" }.filter { candidate in
-            let indexURL = candidate.appendingPathComponent("AssetData", isDirectory: true).appendingPathComponent(
-                "documentation-db",
-                isDirectory: true
-            ).appendingPathComponent("index.sql")
-            return (try? FileHandle(forReadingFrom: indexURL)) != nil
-        }.sorted { lhs, rhs in modificationDate(for: lhs) > modificationDate(for: rhs) }
+        let candidates = contents
+            .filter { $0.pathExtension == "asset" }
+            .filter { hasReadableIndex(at: $0) }
+            .sorted { lhs, rhs in modificationDate(for: lhs) > modificationDate(for: rhs) }
 
         guard let assetURL = candidates.first else {
             throw BridgeError(
@@ -45,13 +35,66 @@ package struct DocumentationAssetLocator {
     private func databaseDirectoryURL(fromAssetURL assetURL: URL) throws -> URL {
         let assetDataURL = assetURL.appendingPathComponent("AssetData", isDirectory: true)
         let databaseDirectoryURL = assetDataURL.appendingPathComponent("documentation-db", isDirectory: true)
-        let indexURL = databaseDirectoryURL.appendingPathComponent("index.sql")
+        let indexURL = indexURL(forAssetURL: assetURL)
         do {
-            let handle = try FileHandle(forReadingFrom: indexURL)
-            handle.closeFile()
-        } catch { throw BridgeError(.assetNotFound, "Documentation index is missing at \(indexURL.path)") }
+            try openAndCloseFile(at: indexURL)
+        } catch {
+            if isMissingFileError(error) {
+                throw BridgeError(
+                    .assetNotFound,
+                    "Documentation index is missing at \(indexURL.path)",
+                    underlyingError: error
+                )
+            }
+
+            throw error
+        }
 
         return databaseDirectoryURL
+    }
+
+    private func assetRootContents() throws -> [URL] {
+        do {
+            return try fileManager.contentsOfDirectory(
+                at: assetRootURL,
+                includingPropertiesForKeys: [.isDirectoryKey, .contentModificationDateKey],
+                options: [.skipsHiddenFiles]
+            )
+        } catch {
+            if isMissingFileError(error) {
+                throw BridgeError(
+                    .assetNotFound,
+                    "Documentation asset root is missing at \(assetRootURL.path)",
+                    underlyingError: error
+                )
+            }
+
+            throw error
+        }
+    }
+
+    private func hasReadableIndex(at assetURL: URL) -> Bool {
+        do {
+            try openAndCloseFile(at: indexURL(forAssetURL: assetURL))
+            return true
+        } catch { return false }
+    }
+
+    private func indexURL(forAssetURL assetURL: URL) -> URL {
+        assetURL.appendingPathComponent("AssetData", isDirectory: true)
+            .appendingPathComponent("documentation-db", isDirectory: true)
+            .appendingPathComponent("index.sql")
+    }
+
+    private func openAndCloseFile(at url: URL) throws {
+        let handle = try FileHandle(forReadingFrom: url)
+        handle.closeFile()
+    }
+
+    private func isMissingFileError(_ error: Error) -> Bool {
+        let nsError = error as NSError
+        guard nsError.domain == NSCocoaErrorDomain else { return false }
+        return nsError.code == NSFileNoSuchFileError || nsError.code == NSFileReadNoSuchFileError
     }
 
     private func modificationDate(for url: URL) -> Date {
