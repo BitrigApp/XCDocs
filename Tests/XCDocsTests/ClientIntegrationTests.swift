@@ -38,6 +38,18 @@ struct ClientIntegrationTests {
     }
 
     @Test
+    func entryAppendsSubtopicContentForCollectionGroupArticles() async throws {
+        guard #available(macOS 26, *) else { return }
+        try await entryAppendsSubtopicContentForCollectionGroupArticlesOnSupportedOS()
+    }
+
+    @Test
+    func searchDoesNotReturnArticleSubtopicsSeparatelyWhenParentArticleIsPresent() async throws {
+        guard #available(macOS 26, *) else { return }
+        try await searchDoesNotReturnArticleSubtopicsSeparatelyWhenParentArticleIsPresentOnSupportedOS()
+    }
+
+    @Test
     func missingIdentifiersThrowAssetNotFoundBridgeErrors() async throws {
         guard #available(macOS 26, *) else { return }
         try await missingIdentifiersThrowAssetNotFoundBridgeErrorsOnSupportedOS()
@@ -93,6 +105,34 @@ private func entryReturnsExpectedMetadataAndContentOnSupportedOS() async throws 
     #expect(result.framework == LiveEnvironment.searchFramework)
     #expect(!(result.title ?? "").isEmpty)
     #expect(!(result.content ?? "").isEmpty)
+}
+
+@available(macOS 26, *)
+private func entryAppendsSubtopicContentForCollectionGroupArticlesOnSupportedOS() async throws {
+    let client = Client()
+    let result = try await client.entry(for: LiveEnvironment.articleWithSubtopicsIdentifier)
+    let content = try #require(result.content)
+
+    #expect(content.contains("Learn how to design and develop beautiful interfaces that leverage Liquid Glass."))
+    #expect(content.contains("Liquid Glass: Introduction to Liquid Glass"))
+    #expect(content.contains("Liquid Glass: Adopting Liquid Glass"))
+    #expect(content.contains("Liquid Glass: Essentials"))
+}
+
+@available(macOS 26, *)
+private func searchDoesNotReturnArticleSubtopicsSeparatelyWhenParentArticleIsPresentOnSupportedOS() async throws {
+    let client = Client()
+    let results = try await client.search(LiveEnvironment.articleWithSubtopicsQuery, limit: 10, omitContent: false)
+    let articleResult = try #require(results.first { $0.entry.id == LiveEnvironment.articleWithSubtopicsIdentifier })
+    let articleContent = try #require(articleResult.entry.content)
+
+    #expect(articleContent.contains("Liquid Glass: Introduction to Liquid Glass"))
+    #expect(
+        results.allSatisfy { result in
+            result.entry.id == LiveEnvironment.articleWithSubtopicsIdentifier
+                || !result.entry.id.hasPrefix("\(LiveEnvironment.articleWithSubtopicsIdentifier)#")
+        }
+    )
 }
 
 @available(macOS 26, *)

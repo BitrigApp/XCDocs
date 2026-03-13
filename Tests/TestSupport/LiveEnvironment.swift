@@ -6,6 +6,8 @@ package enum LiveEnvironment {
     package static let documentationIdentifier = "/documentation/Testing"
     package static let searchFramework = "Swift Testing"
     package static let searchQuery = "swift testing"
+    package static let articleWithSubtopicsIdentifier = "/documentation/TechnologyOverviews/liquid-glass"
+    package static let articleWithSubtopicsQuery = "liquid glass"
 
     private static let mediaAnalysisServicesPath = "/System/Library/PrivateFrameworks/MediaAnalysisServices.framework"
     private static let vectorSearchPath = "/System/Library/PrivateFrameworks/VectorSearch.framework"
