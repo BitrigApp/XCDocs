@@ -39,6 +39,24 @@ struct ModelTests {
         guard #available(macOS 26, *) else { return }
         assertStableIdentities()
     }
+
+    @Test
+    func documentationEntryDecodesUnknownKindAsNil() throws {
+        guard #available(macOS 26, *) else { return }
+        try assertUnknownKindDecodesAsNil()
+    }
+
+    @Test
+    func searchResultWithNaNScoreThrowsOnJSONEncode() throws {
+        guard #available(macOS 26, *) else { return }
+        assertNaNScoreThrowsOnEncode()
+    }
+
+    @Test
+    func searchResultWithInfinityScoreThrowsOnJSONEncode() throws {
+        guard #available(macOS 26, *) else { return }
+        assertInfinityScoreThrowsOnEncode()
+    }
 }
 
 @available(macOS 26, *)
@@ -145,6 +163,33 @@ private func assertStableIdentities() {
 
     #expect(entry.id == "/documentation/Testing")
     #expect(result.id == entry.id)
+}
+
+@available(macOS 26, *)
+private func assertUnknownKindDecodesAsNil() throws {
+    let json = """
+        {"id":"/doc/X","framework":null,"kind":"unknownKind","title":null,"content":null}
+        """
+    let entry = try JSONDecoder().decode(DocumentationEntry.self, from: Data(json.utf8))
+    #expect(entry.kind == nil)
+}
+
+@available(macOS 26, *)
+private func assertNaNScoreThrowsOnEncode() {
+    let result = SearchResult(
+        score: .nan,
+        entry: DocumentationEntry(id: "/doc/X", framework: nil, kind: nil, title: nil, content: nil)
+    )
+    #expect(throws: EncodingError.self) { try JSONEncoder().encode(result) }
+}
+
+@available(macOS 26, *)
+private func assertInfinityScoreThrowsOnEncode() {
+    let result = SearchResult(
+        score: .infinity,
+        entry: DocumentationEntry(id: "/doc/X", framework: nil, kind: nil, title: nil, content: nil)
+    )
+    #expect(throws: EncodingError.self) { try JSONEncoder().encode(result) }
 }
 
 private func assertRoundTrip<T: Codable & Equatable>(_ value: T) throws {

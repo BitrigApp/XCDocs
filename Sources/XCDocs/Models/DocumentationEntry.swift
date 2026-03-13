@@ -33,4 +33,13 @@ public struct DocumentationEntry: Codable, Hashable, Identifiable, Sendable {
         self.title = title
         self.content = content
     }
+
+    public init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(String.self, forKey: .id)
+        self.framework = try container.decodeIfPresent(String.self, forKey: .framework)
+        self.kind = try? container.decodeIfPresent(DocumentationKind.self, forKey: .kind)
+        self.title = try container.decodeIfPresent(String.self, forKey: .title)
+        self.content = try container.decodeIfPresent(String.self, forKey: .content)
+    }
 }

@@ -25,7 +25,7 @@ struct BridgeErrorTests {
     func formatsDescriptionForAllErrorCodes() {
         let codes: [BridgeErrorCode] = [
             .frameworkUnavailable, .classUnavailable, .selectorUnavailable, .assetNotFound, .invalidResponse,
-            .invalidEmbedding, .operationFailed, .searchFailed, .timeout,
+            .invalidEmbedding, .operationFailed, .invalidScore, .searchFailed, .timeout,
         ]
 
         for code in codes {
