@@ -14,9 +14,11 @@ package struct VSKSearchResultObject: PrivateObject {
     package var stringIdentifier: String { value(forKey: .stringIdentifier, as: String.self, default: "") }
 
     package var score: Double {
-        if let number: NSNumber = value(forKey: .value, as: NSNumber.self) { return number.doubleValue }
-        if let value: Double = value(forKey: .value, as: Double.self) { return value }
-        return .nan
+        get throws {
+            if let number: NSNumber = value(forKey: .value, as: NSNumber.self) { return number.doubleValue }
+            if let value: Double = value(forKey: .value, as: Double.self) { return value }
+            throw BridgeError(.invalidScore, "Search result score could not be read as a numeric value")
+        }
     }
 
     package var attributes: [String: String] {

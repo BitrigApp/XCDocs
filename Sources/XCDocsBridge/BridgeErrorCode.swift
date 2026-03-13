@@ -6,6 +6,7 @@ package enum BridgeErrorCode: String, Sendable {
     case invalidResponse
     case invalidEmbedding
     case operationFailed
+    case invalidScore
     case searchFailed
     case timeout
 }
