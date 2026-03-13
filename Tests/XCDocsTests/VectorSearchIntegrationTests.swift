@@ -6,21 +6,31 @@ import Testing
 @Suite("VectorSearch Integration", .enabled(if: LiveEnvironment.isAvailable), .serialized)
 struct VectorSearchIntegrationTests {
     @Test
-    func initializesConfigAndClientAgainstTheLiveDatabase() throws {
+    func initializesConfigAndClientAgainstTheLiveDatabase() async throws {
         let databaseDirectoryURL = try LiveEnvironment.databaseDirectoryURL()
-        let config = try VSKConfigObject(baseDirectoryURL: databaseDirectoryURL, numberOfProbes: 8, readOnly: true)
+        let config = try await VSKConfigObject(
+            baseDirectoryURL: databaseDirectoryURL,
+            numberOfProbes: 8,
+            readOnly: true
+        )
 
-        _ = try VSKClientObject(config: config)
+        _ = try await VSKClientObject(config: config)
     }
 
     @Test
-    func looksUpAssetsByIdentifier() throws {
+    func looksUpAssetsByIdentifier() async throws {
         let databaseDirectoryURL = try LiveEnvironment.databaseDirectoryURL()
-        let config = try VSKConfigObject(baseDirectoryURL: databaseDirectoryURL, numberOfProbes: 8, readOnly: true)
-        let client = try VSKClientObject(config: config)
-        let attributes = try [VSKAttributeObject.stringNamed("framework"), VSKAttributeObject.stringNamed("title")]
+        let config = try await VSKConfigObject(
+            baseDirectoryURL: databaseDirectoryURL,
+            numberOfProbes: 8,
+            readOnly: true
+        )
+        let client = try await VSKClientObject(config: config)
+        let frameworkAttribute = try await VSKAttributeObject.stringNamed("framework")
+        let titleAttribute = try await VSKAttributeObject.stringNamed("title")
+        let attributes = [frameworkAttribute, titleAttribute]
 
-        let assets = try client.stringIdentifiedAssets(
+        let assets = try await client.stringIdentifiedAssets(
             identifiers: [LiveEnvironment.documentationIdentifier],
             attributeFilters: [],
             includeVectors: false,
@@ -28,8 +38,11 @@ struct VectorSearchIntegrationTests {
         )
 
         let asset = try #require(assets.first)
-        #expect(asset.stringIdentifier == LiveEnvironment.documentationIdentifier)
-        #expect(asset.attributes["framework"] == LiveEnvironment.searchFramework)
-        #expect(!(asset.attributes["title"] ?? "").isEmpty)
+        let identifier = await asset.stringIdentifier
+        let assetAttributes = await asset.attributes
+
+        #expect(identifier == LiveEnvironment.documentationIdentifier)
+        #expect(assetAttributes["framework"] == LiveEnvironment.searchFramework)
+        #expect(!(assetAttributes["title"] ?? "").isEmpty)
     }
 }

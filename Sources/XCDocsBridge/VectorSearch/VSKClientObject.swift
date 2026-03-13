@@ -112,6 +112,24 @@ package final class VSKClientObject: PrivateObject {
         return assets.map(VSKAssetObject.init(base:))
     }
 
+    package func requiredStringIdentifiedAsset(
+        identifier: String,
+        attributeFilters: [VSKFilterObject],
+        includeVectors: Bool,
+        selectAttributes: [VSKAttributeObject]
+    ) throws -> VSKAssetObject {
+        guard
+            let asset = try stringIdentifiedAssets(
+                identifiers: [identifier],
+                attributeFilters: attributeFilters,
+                includeVectors: includeVectors,
+                selectAttributes: selectAttributes
+            ).first
+        else { throw BridgeError(.assetNotFound, "No documentation entry was found for \(identifier)") }
+
+        return asset
+    }
+
     private static let initSelector = NSSelectorFromString("initWithConfig:error:")
     private static let searchByVectorSelector = NSSelectorFromString(
         "searchByVector:stringIdentifiers:attributeFilters:selectAttributes:limit:fullScan:includePayload:numberOfProbes:batchSize:numConcurrentReaders:error:"

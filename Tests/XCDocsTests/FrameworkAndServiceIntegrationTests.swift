@@ -18,12 +18,13 @@ struct FrameworkAndServiceIntegrationTests {
 
     @Test
     func mediaAnalysisServicesProducesAnEmbeddingVector() async throws {
-        let service = try MADServiceObject()
-        let request = try MADTextEmbeddingRequestObject()
-        let textInput = try MADTextInputObject(text: LiveEnvironment.searchQuery)
+        let service = try await MADServiceObject()
+        let request = try await MADTextEmbeddingRequestObject()
+        let textInput = try await MADTextInputObject(text: LiveEnvironment.searchQuery)
         let vector = try await LiveEnvironment.embeddingVector(for: LiveEnvironment.searchQuery)
+        let embeddingResults = await request.embeddingResults
 
-        #expect(request.embeddingResults.isEmpty)
+        #expect(embeddingResults.isEmpty)
         #expect(!vector.isEmpty)
         #expect(vector.count.isMultiple(of: MemoryLayout<Float>.size))
         _ = service

@@ -37,18 +37,29 @@ let package = Package(
         .target(
             name: "ExceptionCatcher",
             dependencies: [
-                "XCDocsBridge",
                 "ExceptionCatcherObjC",
             ],
-            path: "Sources/ExceptionCatcher"
+            path: "Sources/ExceptionCatcher",
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
+            ]
         ),
         .target(
-            name: "XCDocsBridge"
+            name: "XCDocsBridge",
+            dependencies: [
+                "ExceptionCatcher",
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
+            ]
         ),
         .target(
             name: "XCDocsSupport",
             dependencies: [
                 "XCDocsBridge",
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
             ]
         ),
         .target(
@@ -56,7 +67,9 @@ let package = Package(
             dependencies: [
                 "XCDocsBridge",
                 "XCDocsSupport",
-                "ExceptionCatcher",
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
             ]
         ),
         .executableTarget(
@@ -67,12 +80,14 @@ let package = Package(
                     name: "ArgumentParser",
                     package: "swift-argument-parser"
                 ),
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
             ]
         ),
         .target(
             name: "TestSupport",
             dependencies: [
-                "ExceptionCatcher",
                 "XCDocsBridge",
                 "XCDocsSupport",
                 .product(
@@ -80,7 +95,10 @@ let package = Package(
                     package: "swift-subprocess"
                 ),
             ],
-            path: "Tests/TestSupport"
+            path: "Tests/TestSupport",
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
+            ]
         ),
         .testTarget(
             name: "XCDocsTests",
@@ -91,6 +109,9 @@ let package = Package(
                 "XCDocs",
                 "XCDocsBridge",
                 "XCDocsSupport",
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
             ]
         ),
         .testTarget(
@@ -98,6 +119,9 @@ let package = Package(
             dependencies: [
                 "TestSupport",
                 "XCDocsCLI",
+            ],
+            swiftSettings: [
+                .enableUpcomingFeature("StrictConcurrency"),
             ]
         ),
     ]

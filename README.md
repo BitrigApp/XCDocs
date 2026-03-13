@@ -57,7 +57,7 @@ let searchResults = try await client.search(
     omitContent: false
 )
 
-let fetchResult = try client.fetch(
+let fetchResult = try await client.fetch(
     "/documentation/Testing"
 )
 ```

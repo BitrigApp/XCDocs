@@ -5,13 +5,13 @@ package struct BridgeError: Error, LocalizedError, CustomStringConvertible {
     let message: String
     let underlyingError: Error?
 
-    package init(_ code: BridgeErrorCode, _ message: String) {
+    init(_ code: BridgeErrorCode, _ message: String) {
         self.code = code
         self.message = message
         self.underlyingError = nil
     }
 
-    package init(_ code: BridgeErrorCode, _ message: String, underlyingError: Error?) {
+    init(_ code: BridgeErrorCode, _ message: String, underlyingError: Error?) {
         self.code = code
         self.message = message
         self.underlyingError = underlyingError

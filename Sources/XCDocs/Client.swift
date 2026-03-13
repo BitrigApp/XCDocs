@@ -1,4 +1,3 @@
-import ExceptionCatcher
 import Foundation
 import XCDocsBridge
 import XCDocsSupport
@@ -9,7 +8,7 @@ import XCDocsSupport
 /// generates semantic query embeddings using Apple's private embedding service, and
 /// resolves search results into stable Swift value types.
 @available(macOS 26, *)
-public struct Client {
+public final class Client {
     /// Creates a client for interacting with the local documentation asset.
     public init() {}
 
@@ -40,9 +39,9 @@ public struct Client {
         let databaseDirectoryURL = try DocumentationAssetLocator().locateDatabaseDirectoryURL()
         let vector = try await embeddingVector(for: query)
 
-        let searchClient = try VectorSearchClient(databaseDirectoryURL: databaseDirectoryURL, readOnly: true)
+        let searchClient = try await VectorSearchClient(databaseDirectoryURL: databaseDirectoryURL, readOnly: true)
 
-        let hits = try searchClient.search(
+        let hits = try await searchClient.search(
             vector: vector,
             frameworks: frameworks,
             kinds: kinds.map(\.rawValue),
@@ -72,14 +71,12 @@ public struct Client {
     /// - Returns: The resolved documentation entry.
     /// - Throws: An error if the documentation asset cannot be found, if the identifier does
     ///   not exist, or if the underlying storage backend fails to load the entry.
-    public func fetch(_ identifier: String) throws -> FetchResult {
+    public func fetch(_ identifier: String) async throws -> FetchResult {
         let databaseDirectoryURL = try DocumentationAssetLocator().locateDatabaseDirectoryURL()
 
-        let searchClient = try VectorSearchClient(databaseDirectoryURL: databaseDirectoryURL, readOnly: true)
+        let searchClient = try await VectorSearchClient(databaseDirectoryURL: databaseDirectoryURL, readOnly: true)
 
-        guard let result = try searchClient.fetch(identifier: identifier) else {
-            throw BridgeError(.assetNotFound, "No documentation entry was found for \(identifier)")
-        }
+        let result = try await searchClient.fetch(identifier: identifier)
 
         return FetchResult(
             identifier: result.identifier,
@@ -93,60 +90,12 @@ public struct Client {
     // MARK: Private
 
     private func embeddingVector(for text: String) async throws -> Data {
-        let service = try MADServiceObject()
-        let request = try MADTextEmbeddingRequestObject()
-        let textInput = try MADTextInputObject(text: text)
+        let service = try await MADServiceObject()
+        let request = try await MADTextEmbeddingRequestObject()
+        let textInput = try await MADTextInputObject(text: text)
 
-        let (embeddingData, elementCount) = try await withCheckedThrowingContinuation {
-            (continuation: CheckedContinuation<(Data, Int), any Error>) in
-            let completionHandler: @convention(block) () -> Void = {
-                guard let result = request.embeddingResults.first, !result.embeddingData.isEmpty else {
-                    continuation.resume(
-                        throwing: BridgeError(
-                            .operationFailed,
-                            "MediaAnalysisServices completed without returning embedding data."
-                        )
-                    )
-                    return
-                }
-                let count =
-                    result.elementCount > 0
-                    ? result.elementCount : result.embeddingData.count / MemoryLayout<UInt16>.size
-                continuation.resume(returning: (result.embeddingData, count))
-            }
-            let completionHandlerObject = completionHandler as AnyObject
+        _ = try await service.performRequests(requests: [request], textInputs: [textInput])
 
-            do {
-                try runCatchingExceptions {
-                    _ = try service.performRequests(
-                        requests: [request],
-                        textInputs: [textInput],
-                        completionHandler: completionHandlerObject
-                    )
-                }
-            } catch { continuation.resume(throwing: error) }
-        }
-
-        return try makeFloat32Data(from: embeddingData, expectedCount: elementCount)
-    }
-
-    private func makeFloat32Data(from float16Data: Data, expectedCount: Int) throws -> Data {
-        let resolvedCount = float16Data.count / MemoryLayout<UInt16>.size
-        guard resolvedCount == expectedCount else {
-            throw BridgeError(
-                .invalidEmbedding,
-                "Embedding element count mismatch: expected \(expectedCount), got \(resolvedCount)"
-            )
-        }
-
-        var result = Data(capacity: expectedCount * MemoryLayout<Float>.size)
-        float16Data.withUnsafeBytes { (rawBuffer: UnsafeRawBufferPointer) in
-            let halfValues = rawBuffer.bindMemory(to: UInt16.self)
-            for bits in halfValues {
-                var floatValue = Float(Float16(bitPattern: bits))
-                withUnsafeBytes(of: &floatValue) { floatBytes in result.append(contentsOf: floatBytes) }
-            }
-        }
-        return result
+        return try await request.float32EmbeddingData()
     }
 }
