@@ -62,7 +62,7 @@ private func frameworkFilteringWorksEndToEndOnSupportedOS() async throws {
     )
 
     #expect(!results.isEmpty)
-    #expect(results.allSatisfy { $0.framework == LiveEnvironment.searchFramework })
+    #expect(results.allSatisfy { $0.entry.framework == LiveEnvironment.searchFramework })
 }
 
 @available(macOS 26, *)
@@ -71,7 +71,7 @@ private func kindFilteringWorksEndToEndOnSupportedOS() async throws {
     let results = try await client.search(LiveEnvironment.searchQuery, kinds: [.article], limit: 5)
 
     #expect(!results.isEmpty)
-    #expect(results.allSatisfy { $0.kind == .article })
+    #expect(results.allSatisfy { $0.entry.kind == .article })
 }
 
 @available(macOS 26, *)
@@ -80,8 +80,8 @@ private func omitContentIsReflectedInMappedSearchResultsOnSupportedOS() async th
     let withoutContent = try await client.search("swiftui color", limit: 5, omitContent: true)
     let withContent = try await client.search("swiftui color", limit: 5, omitContent: false)
 
-    #expect(withoutContent.allSatisfy { $0.content == nil })
-    #expect(withContent.contains { !(($0.content ?? "").isEmpty) })
+    #expect(withoutContent.allSatisfy { $0.entry.content == nil })
+    #expect(withContent.contains { !(($0.entry.content ?? "").isEmpty) })
 }
 
 @available(macOS 26, *)
@@ -89,7 +89,7 @@ private func fetchReturnsExpectedMetadataAndContentOnSupportedOS() async throws 
     let client = Client()
     let result = try await client.fetch(LiveEnvironment.documentationIdentifier)
 
-    #expect(result.identifier == LiveEnvironment.documentationIdentifier)
+    #expect(result.id == LiveEnvironment.documentationIdentifier)
     #expect(result.framework == LiveEnvironment.searchFramework)
     #expect(!(result.title ?? "").isEmpty)
     #expect(!(result.content ?? "").isEmpty)
