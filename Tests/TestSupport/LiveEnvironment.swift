@@ -1,4 +1,3 @@
-import ExceptionCatcher
 import Foundation
 import XCDocsBridge
 import XCDocsSupport
@@ -26,60 +25,12 @@ package enum LiveEnvironment {
     }
 
     package static func embeddingVector(for text: String) async throws -> Data {
-        let service = try MADServiceObject()
-        let request = try MADTextEmbeddingRequestObject()
-        let textInput = try MADTextInputObject(text: text)
+        let service = try await MADServiceObject()
+        let request = try await MADTextEmbeddingRequestObject()
+        let textInput = try await MADTextInputObject(text: text)
 
-        let (embeddingData, elementCount) = try await withCheckedThrowingContinuation {
-            (continuation: CheckedContinuation<(Data, Int), any Error>) in
-            let completionHandler: @convention(block) () -> Void = {
-                guard let result = request.embeddingResults.first, !result.embeddingData.isEmpty else {
-                    continuation.resume(
-                        throwing: BridgeError(
-                            .operationFailed,
-                            "MediaAnalysisServices completed without returning embedding data."
-                        )
-                    )
-                    return
-                }
-                let count =
-                    result.elementCount > 0
-                    ? result.elementCount : result.embeddingData.count / MemoryLayout<UInt16>.size
-                continuation.resume(returning: (result.embeddingData, count))
-            }
-            let completionHandlerObject = completionHandler as AnyObject
+        _ = try await service.performRequests(requests: [request], textInputs: [textInput])
 
-            do {
-                try runCatchingExceptions {
-                    _ = try service.performRequests(
-                        requests: [request],
-                        textInputs: [textInput],
-                        completionHandler: completionHandlerObject
-                    )
-                }
-            } catch { continuation.resume(throwing: error) }
-        }
-
-        return try makeFloat32Data(from: embeddingData, expectedCount: elementCount)
-    }
-
-    private static func makeFloat32Data(from float16Data: Data, expectedCount: Int) throws -> Data {
-        let resolvedCount = float16Data.count / MemoryLayout<UInt16>.size
-        guard resolvedCount == expectedCount else {
-            throw BridgeError(
-                .invalidEmbedding,
-                "Embedding element count mismatch: expected \(expectedCount), got \(resolvedCount)"
-            )
-        }
-
-        var result = Data(capacity: expectedCount * MemoryLayout<Float>.size)
-        float16Data.withUnsafeBytes { (rawBuffer: UnsafeRawBufferPointer) in
-            let halfValues = rawBuffer.bindMemory(to: UInt16.self)
-            for bits in halfValues {
-                var floatValue = Float(Float16(bitPattern: bits))
-                withUnsafeBytes(of: &floatValue) { floatBytes in result.append(contentsOf: floatBytes) }
-            }
-        }
-        return result
+        return try await request.float32EmbeddingData()
     }
 }

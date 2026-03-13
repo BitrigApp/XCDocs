@@ -32,15 +32,15 @@ struct ClientIntegrationTests {
     }
 
     @Test
-    func fetchReturnsExpectedMetadataAndContent() throws {
+    func fetchReturnsExpectedMetadataAndContent() async throws {
         guard #available(macOS 26, *) else { return }
-        try fetchReturnsExpectedMetadataAndContentOnSupportedOS()
+        try await fetchReturnsExpectedMetadataAndContentOnSupportedOS()
     }
 
     @Test
-    func missingIdentifiersThrowAssetNotFoundBridgeErrors() throws {
+    func missingIdentifiersThrowAssetNotFoundBridgeErrors() async throws {
         guard #available(macOS 26, *) else { return }
-        try missingIdentifiersThrowAssetNotFoundBridgeErrorsOnSupportedOS()
+        try await missingIdentifiersThrowAssetNotFoundBridgeErrorsOnSupportedOS()
     }
 }
 
@@ -85,9 +85,9 @@ private func omitContentIsReflectedInMappedSearchResultsOnSupportedOS() async th
 }
 
 @available(macOS 26, *)
-private func fetchReturnsExpectedMetadataAndContentOnSupportedOS() throws {
+private func fetchReturnsExpectedMetadataAndContentOnSupportedOS() async throws {
     let client = Client()
-    let result = try client.fetch(LiveEnvironment.documentationIdentifier)
+    let result = try await client.fetch(LiveEnvironment.documentationIdentifier)
 
     #expect(result.identifier == LiveEnvironment.documentationIdentifier)
     #expect(result.framework == LiveEnvironment.searchFramework)
@@ -96,9 +96,9 @@ private func fetchReturnsExpectedMetadataAndContentOnSupportedOS() throws {
 }
 
 @available(macOS 26, *)
-private func missingIdentifiersThrowAssetNotFoundBridgeErrorsOnSupportedOS() throws {
+private func missingIdentifiersThrowAssetNotFoundBridgeErrorsOnSupportedOS() async throws {
     let client = Client()
-    let error = try #require(captureBridgeError { try client.fetch("/documentation/DefinitelyNotReal") })
+    let error = try #require(await captureBridgeError { try await client.fetch("/documentation/DefinitelyNotReal") })
 
     #expect(error.code == .assetNotFound)
     #expect(error.message.contains("/documentation/DefinitelyNotReal"))

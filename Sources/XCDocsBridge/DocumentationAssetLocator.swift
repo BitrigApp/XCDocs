@@ -1,5 +1,4 @@
 import Foundation
-import XCDocsBridge
 
 package struct DocumentationAssetLocator {
     private static let defaultAssetRootURL = URL(

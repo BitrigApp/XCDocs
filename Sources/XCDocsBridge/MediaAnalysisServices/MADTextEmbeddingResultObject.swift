@@ -1,6 +1,6 @@
 import Foundation
 
-package struct MADTextEmbeddingResultObject: PrivateObject, @unchecked Sendable {
+package struct MADTextEmbeddingResultObject: PrivateObject {
     enum Key: String {
         case elementCount
         case embeddingData

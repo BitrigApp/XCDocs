@@ -10,30 +10,30 @@ package final class VectorSearchClient {
 
     private let client: VSKClientObject
 
-    package init(databaseDirectoryURL: URL, readOnly: Bool) throws {
-        let config = try VSKConfigObject(
+    package init(databaseDirectoryURL: URL, readOnly: Bool) async throws {
+        let config = try await VSKConfigObject(
             baseDirectoryURL: databaseDirectoryURL,
             numberOfProbes: SearchConfiguration.numberOfProbes,
             readOnly: readOnly
         )
-        self.client = try VSKClientObject(config: config)
+        self.client = try await VSKClientObject(config: config)
     }
 
-    package func search(vector: Data, frameworks: [String], kinds: [String], limit: Int, omitContent: Bool) throws
+    package func search(vector: Data, frameworks: [String], kinds: [String], limit: Int, omitContent: Bool) async throws
         -> [VectorSearchHit]
     {
         guard limit > 0 else { return [] }
 
-        let filters =
-            try makeFilters(attributeName: "framework", values: frameworks)
-            + makeFilters(attributeName: "type", values: kinds)
+        let frameworkFilters = try await makeFilters(attributeName: "framework", values: frameworks)
+        let kindFilters = try await makeFilters(attributeName: "type", values: kinds)
+        let filters = frameworkFilters + kindFilters
         var selectedAttributes = [
-            try VSKAttributeObject.stringNamed("framework"), try VSKAttributeObject.stringNamed("type"),
-            try VSKAttributeObject.stringNamed("title"),
+            try await VSKAttributeObject.stringNamed("framework"), try await VSKAttributeObject.stringNamed("type"),
+            try await VSKAttributeObject.stringNamed("title"),
         ]
-        if !omitContent { selectedAttributes.append(try VSKAttributeObject.stringNamed("content")) }
+        if !omitContent { selectedAttributes.append(try await VSKAttributeObject.stringNamed("content")) }
 
-        let rawResults = try client.search(
+        let rawResults = try await client.search(
             vector: vector,
             stringIdentifiers: nil,
             attributeFilters: filters,
@@ -45,53 +45,66 @@ package final class VectorSearchClient {
             numConcurrentReaders: SearchConfiguration.concurrentReaders
         )
 
-        let hits = try rawResults.map {
-            try VectorSearchHit(identifier: $0.stringIdentifier, score: $0.score, attributes: $0.attributes)
+        var hits: [VectorSearchHit] = []
+        hits.reserveCapacity(rawResults.count)
+        for result in rawResults {
+            hits.append(
+                try await VectorSearchHit(
+                    identifier: result.stringIdentifier,
+                    score: result.score,
+                    attributes: result.attributes
+                )
+            )
         }
 
-        return try hydrateSearchHits(hits, selectedAttributes: selectedAttributes)
+        return try await hydrateSearchHits(hits, selectedAttributes: selectedAttributes)
     }
 
-    package func fetch(identifier: String) throws -> VectorSearchHit? {
+    package func fetch(identifier: String) async throws -> VectorSearchHit {
         let selectedAttributes = [
-            try VSKAttributeObject.stringNamed("framework"), try VSKAttributeObject.stringNamed("type"),
-            try VSKAttributeObject.stringNamed("title"), try VSKAttributeObject.stringNamed("content"),
+            try await VSKAttributeObject.stringNamed("framework"), try await VSKAttributeObject.stringNamed("type"),
+            try await VSKAttributeObject.stringNamed("title"), try await VSKAttributeObject.stringNamed("content"),
         ]
 
-        guard
-            let asset = try client.stringIdentifiedAssets(
-                identifiers: [identifier],
-                attributeFilters: [],
-                includeVectors: false,
-                selectAttributes: selectedAttributes
-            ).first
-        else { return nil }
+        let asset = try await client.requiredStringIdentifiedAsset(
+            identifier: identifier,
+            attributeFilters: [],
+            includeVectors: false,
+            selectAttributes: selectedAttributes
+        )
 
-        return VectorSearchHit(identifier: asset.stringIdentifier, score: .nan, attributes: asset.attributes)
+        return await VectorSearchHit(identifier: asset.stringIdentifier, score: .nan, attributes: asset.attributes)
     }
 
     // MARK: Private
 
-    private func makeFilters(attributeName: String, values: [String]) throws -> [VSKFilterObject] {
+    private func makeFilters(attributeName: String, values: [String]) async throws -> [VSKFilterObject] {
         let normalizedValues = values.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }
 
         guard !normalizedValues.isEmpty else { return [] }
 
-        let attribute = try VSKAttributeObject.stringNamed(attributeName)
-        let disjunctiveFilters = try normalizedValues.map { value in
-            try VSKDisjunctiveFilterObject(
-                operatorRawValue: VSKFilterOperator.equals.rawValue,
-                value: VSKDatabaseValueObject(string: value)
+        let attribute = try await VSKAttributeObject.stringNamed(attributeName)
+        var disjunctiveFilters: [VSKDisjunctiveFilterObject] = []
+        disjunctiveFilters.reserveCapacity(normalizedValues.count)
+        for value in normalizedValues {
+            let databaseValue = try await VSKDatabaseValueObject(string: value)
+            disjunctiveFilters.append(
+                try await VSKDisjunctiveFilterObject(
+                    operatorRawValue: VSKFilterOperator.equals.rawValue,
+                    value: databaseValue
+                )
             )
         }
 
-        return [try VSKFilterObject(attribute: attribute, disjunctiveFilters: disjunctiveFilters)]
+        return [try await VSKFilterObject(attribute: attribute, disjunctiveFilters: disjunctiveFilters)]
     }
 
-    private func hydrateSearchHits(_ hits: [VectorSearchHit], selectedAttributes: [VSKAttributeObject]) throws
+    private func hydrateSearchHits(_ hits: [VectorSearchHit], selectedAttributes: [VSKAttributeObject]) async throws
         -> [VectorSearchHit]
     {
-        let attributeNames = selectedAttributes.map(\.name)
+        var attributeNames: [String] = []
+        attributeNames.reserveCapacity(selectedAttributes.count)
+        for attribute in selectedAttributes { attributeNames.append(await attribute.name) }
         let incompleteIdentifiers = Array(
             Set(
                 hits.filter { hit in
@@ -105,16 +118,20 @@ package final class VectorSearchClient {
 
         guard !incompleteIdentifiers.isEmpty else { return hits }
 
-        let hydratedAssets = try client.stringIdentifiedAssets(
+        let hydratedAssets = try await client.stringIdentifiedAssets(
             identifiers: incompleteIdentifiers,
             attributeFilters: [],
             includeVectors: false,
             selectAttributes: selectedAttributes
         )
-        let attributesByIdentifier = hydratedAssets.reduce(into: [String: [String: String]]()) { partialResult, asset in
-            partialResult[asset.stringIdentifier] = asset.attributes.merging(
-                partialResult[asset.stringIdentifier] ?? [:]
-            ) { hydratedValue, existingValue in existingValue.isEmpty ? hydratedValue : existingValue }
+        var attributesByIdentifier: [String: [String: String]] = [:]
+        for asset in hydratedAssets {
+            let identifier = await asset.stringIdentifier
+            let attributes = await asset.attributes
+            attributesByIdentifier[identifier] = attributes.merging(attributesByIdentifier[identifier] ?? [:]) {
+                hydratedValue,
+                existingValue in existingValue.isEmpty ? hydratedValue : existingValue
+            }
         }
 
         return hits.map { hit in

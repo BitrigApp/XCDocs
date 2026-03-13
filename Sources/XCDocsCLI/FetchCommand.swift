@@ -17,7 +17,7 @@ struct FetchCommand: AsyncParsableCommand {
 
     mutating func run() async throws {
         let client = Client()
-        let result = try client.fetch(identifier)
+        let result = try await client.fetch(identifier)
 
         if json {
             try printJSON(result)
