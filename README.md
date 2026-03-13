@@ -51,6 +51,10 @@ xcdocs get /documentation/Testing --json
 
 ## Swift API
 
+XCDocs also exposes a Swift package which you can integrate into other tools.
+
+To get started, add the repo to your `Package.swift`.
+
 ```swift
 import XCDocs
 
@@ -83,8 +87,3 @@ Run formatting checks:
 swift format lint --strict Package.swift
 swift format lint --strict --recursive Sources Tests
 ```
-
-CI:
-
-- `.github/workflows/format.yml` runs formatting checks
-- `.github/workflows/test.yml` runs the package test suite
