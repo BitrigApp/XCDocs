@@ -54,26 +54,38 @@ struct SearchCommand: AsyncParsableCommand {
 }
 
 @available(macOS 26, *)
+struct DocumentationSearchDocument: Encodable {
+    let contents: String?
+    let score: Double
+    let title: String?
+    let uri: String
+
+    init(searchResult: SearchResult) {
+        self.contents = searchResult.entry.content
+        self.score = searchResult.score
+        self.title = searchResult.entry.title
+        self.uri = searchResult.entry.id
+    }
+
+    func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(contents, forKey: .contents)
+        try container.encode(score, forKey: .score)
+        try container.encode(title, forKey: .title)
+        try container.encode(uri, forKey: .uri)
+    }
+
+    private enum CodingKeys: String, CodingKey { case contents, score, title, uri }
+}
+
+@available(macOS 26, *)
+struct DocumentationSearchResponse: Encodable {
+    let documents: [DocumentationSearchDocument]
+
+    init(searchResults: [SearchResult]) { self.documents = searchResults.map(DocumentationSearchDocument.init) }
+}
+
+@available(macOS 26, *)
 private func printDocumentationSearchJSON(_ results: [SearchResult]) throws {
-    struct DocumentationSearchDocument: Encodable {
-        let contents: String
-        let score: Double
-        let title: String
-        let uri: String
-
-        init(searchResult: SearchResult) {
-            self.contents = searchResult.entry.content ?? ""
-            self.score = searchResult.score
-            self.title = searchResult.entry.title ?? ""
-            self.uri = searchResult.entry.id
-        }
-    }
-
-    struct DocumentationSearchResponse: Encodable {
-        let documents: [DocumentationSearchDocument]
-
-        init(searchResults: [SearchResult]) { self.documents = searchResults.map(DocumentationSearchDocument.init) }
-    }
-
     try printJSON(DocumentationSearchResponse(searchResults: results), prettyPrinted: false)
 }
