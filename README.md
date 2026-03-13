@@ -22,10 +22,15 @@ Ask your agent to help!
 
 #### Recommended
 
-Download the CLI from [Releases](https://github.com/BitrigApp/XCDocs/tags) and put it in `/usr/local/bin`.
+Install with Homebrew:
+
+```bash
+brew install BitrigApp/tap/xcdocs
+```
 
 #### Alternative
 
+Download the CLI from [Releases](https://github.com/BitrigApp/XCDocs/releases) and put it in `/usr/local/bin`.
 You can also clone the repo and run `swift build` yourself. The resulting binary will be in `.build/debug/xcdocs`.
 
 ## Agent Skill
