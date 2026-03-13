@@ -1,6 +1,6 @@
 import Foundation
 
-package struct MADTextEmbeddingRequestObject: PrivateObject {
+package struct MADTextEmbeddingRequestObject: PrivateObject, @unchecked Sendable {
     enum Key: String { case embeddingResults }
 
     let base: AnyObject
