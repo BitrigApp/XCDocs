@@ -9,6 +9,8 @@ import XCDocsSupport
 /// resolves search results into stable Swift value types.
 @available(macOS 26, *)
 public final class Client {
+    private var cachedSearchClient: VectorSearchClient?
+
     /// Creates a client for interacting with the local documentation asset.
     public init() {}
 
@@ -36,10 +38,8 @@ public final class Client {
         limit: Int = 10,
         omitContent: Bool = true
     ) async throws -> [SearchResult] {
-        let databaseDirectoryURL = try DocumentationAssetLocator().locateDatabaseDirectoryURL()
+        let searchClient = try await searchClient()
         let vector = try await embeddingVector(for: query)
-
-        let searchClient = try await VectorSearchClient(databaseDirectoryURL: databaseDirectoryURL, readOnly: true)
 
         let hits = try await searchClient.search(
             vector: vector,
@@ -74,10 +74,7 @@ public final class Client {
     /// - Throws: An error if the documentation asset cannot be found, if the identifier does
     ///   not exist, or if the underlying storage backend fails to load the entry.
     public func fetch(_ identifier: String) async throws -> DocumentationEntry {
-        let databaseDirectoryURL = try DocumentationAssetLocator().locateDatabaseDirectoryURL()
-
-        let searchClient = try await VectorSearchClient(databaseDirectoryURL: databaseDirectoryURL, readOnly: true)
-
+        let searchClient = try await searchClient()
         let result = try await searchClient.fetch(identifier: identifier)
 
         return DocumentationEntry(
@@ -90,6 +87,15 @@ public final class Client {
     }
 
     // MARK: Private
+
+    private func searchClient() async throws -> VectorSearchClient {
+        if let cachedSearchClient { return cachedSearchClient }
+
+        let databaseDirectoryURL = try DocumentationAssetLocator().locateDatabaseDirectoryURL()
+        let client = try await VectorSearchClient(databaseDirectoryURL: databaseDirectoryURL, readOnly: true)
+        cachedSearchClient = client
+        return client
+    }
 
     private func embeddingVector(for text: String) async throws -> Data {
         let service = try await MADServiceObject()
