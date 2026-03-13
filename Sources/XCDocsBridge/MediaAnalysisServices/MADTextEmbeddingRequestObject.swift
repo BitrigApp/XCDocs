@@ -5,6 +5,8 @@ package struct MADTextEmbeddingRequestObject: PrivateObject {
 
     let base: AnyObject
 
+    package init(base: AnyObject) { self.base = base }
+
     package init() throws {
         try FrameworkLoader.loadMediaAnalysisServices()
         let cls = try Self.requiredNSObjectClass(named: "MADTextEmbeddingRequest")
@@ -25,14 +27,27 @@ package struct MADTextEmbeddingRequestObject: PrivateObject {
             throw BridgeError(.operationFailed, "MediaAnalysisServices completed without returning embedding data.")
         }
 
-        let elementCount =
-            result.elementCount > 0 ? result.elementCount : embeddingData.count / MemoryLayout<UInt16>.size
-        let resolvedCount = embeddingData.count / MemoryLayout<UInt16>.size
-        guard resolvedCount == elementCount else {
+        let bytesPerElement = MemoryLayout<UInt16>.size
+        guard embeddingData.count.isMultiple(of: bytesPerElement) else {
             throw BridgeError(
                 .invalidEmbedding,
-                "Embedding element count mismatch: expected \(elementCount), got \(resolvedCount)"
+                "Embedding byte count mismatch: expected a multiple of \(bytesPerElement), got \(embeddingData.count)"
             )
+        }
+
+        let resolvedCount = embeddingData.count / bytesPerElement
+        let elementCount: Int
+
+        if result.elementCount > 0 {
+            elementCount = result.elementCount
+            guard resolvedCount == elementCount else {
+                throw BridgeError(
+                    .invalidEmbedding,
+                    "Embedding element count mismatch: expected \(elementCount), got \(resolvedCount)"
+                )
+            }
+        } else {
+            elementCount = resolvedCount
         }
 
         var float32Data = Data(capacity: elementCount * MemoryLayout<Float>.size)
