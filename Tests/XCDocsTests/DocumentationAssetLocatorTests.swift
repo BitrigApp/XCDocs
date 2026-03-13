@@ -20,6 +20,64 @@ struct DocumentationAssetLocatorTests {
 
         #expect(error.code == .assetNotFound)
         #expect(error.message.contains(rootURL.path))
+        #expect((error.underlyingError as NSError?)?.domain == NSCocoaErrorDomain)
+        #expect((error.underlyingError as NSError?)?.code == NSFileReadNoSuchFileError)
+    }
+
+    @Test
+    func rethrowsNonMissingAssetRootLookupErrors() throws {
+        let rootURL = URL(fileURLWithPath: "/tmp/asset-root", isDirectory: true)
+        let underlyingError = NSError(
+            domain: NSCocoaErrorDomain,
+            code: NSFileReadNoPermissionError,
+            userInfo: [NSLocalizedDescriptionKey: "Permission denied"]
+        )
+        let locator = DocumentationAssetLocator(
+            assetRootURL: rootURL,
+            fileManager: StubFileManager(contentsOfDirectoryError: underlyingError)
+        )
+
+        do {
+            _ = try locator.locateDatabaseDirectoryURL()
+            Issue.record("Expected non-missing filesystem error to be rethrown.")
+        } catch let error as BridgeError {
+            Issue.record("Expected underlying filesystem error, got BridgeError: \(error)")
+        } catch {
+            let nsError = error as NSError
+            #expect(nsError.domain == underlyingError.domain)
+            #expect(nsError.code == underlyingError.code)
+            #expect(nsError.localizedDescription == underlyingError.localizedDescription)
+        }
+    }
+
+    @Test
+    func rethrowsNonMissingIndexReadErrorsDuringCandidateFiltering() throws {
+        let rootURL = try makeTemporaryDirectory()
+        let assetURL = rootURL.appendingPathComponent("blocked.asset", isDirectory: true)
+        let databaseDirectoryURL = try createAsset(
+            at: assetURL,
+            includesIndex: true,
+            modificationDate: .distantPast.addingTimeInterval(10)
+        )
+        let indexURL = databaseDirectoryURL.appendingPathComponent("index.sql")
+
+        defer {
+            try? FileManager.default.setAttributes([.posixPermissions: 0o644], ofItemAtPath: indexURL.path)
+            try? FileManager.default.removeItem(at: rootURL)
+        }
+
+        try FileManager.default.setAttributes([.posixPermissions: 0o000], ofItemAtPath: indexURL.path)
+
+        do {
+            _ = try DocumentationAssetLocator(assetRootURL: rootURL).locateDatabaseDirectoryURL()
+            Issue.record("Expected unreadable index error to be rethrown.")
+        } catch let error as BridgeError {
+            Issue.record("Expected underlying filesystem error, got BridgeError: \(error)")
+        } catch {
+            let nsError = error as NSError
+            #expect(nsError.domain == NSCocoaErrorDomain)
+            #expect(nsError.code == NSFileReadNoPermissionError || nsError.code == NSFileWriteNoPermissionError)
+        }
     }
 
     @Test
@@ -165,3 +223,18 @@ private func createAsset(at assetURL: URL, includesIndex: Bool, modificationDate
 }
 
 private func canonicalFileURL(_ url: URL) -> URL { url.standardizedFileURL.resolvingSymlinksInPath() }
+
+private final class StubFileManager: FileManager {
+    private let contentsOfDirectoryError: Error
+
+    init(contentsOfDirectoryError: Error) {
+        self.contentsOfDirectoryError = contentsOfDirectoryError
+        super.init()
+    }
+
+    override func contentsOfDirectory(
+        at url: URL,
+        includingPropertiesForKeys keys: [URLResourceKey]?,
+        options mask: DirectoryEnumerationOptions = []
+    ) throws -> [URL] { throw contentsOfDirectoryError }
+}
