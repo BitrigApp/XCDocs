@@ -20,7 +20,7 @@ struct VectorSearchClientIntegrationTests {
     func searchReturnsResultsForALiveEmbeddingVector() async throws {
         let client = try makeClient()
         let vector = try await LiveEnvironment.embeddingVector(for: LiveEnvironment.searchQuery)
-        let hits = try client.search(vector: vector, frameworks: [], kinds: [], limit: 3, includeContent: false)
+        let hits = try client.search(vector: vector, frameworks: [], kinds: [], limit: 3, omitContent: true)
 
         #expect(!hits.isEmpty)
     }
@@ -34,7 +34,7 @@ struct VectorSearchClientIntegrationTests {
             frameworks: ["  \(LiveEnvironment.searchFramework)  ", "", "   "],
             kinds: [],
             limit: 5,
-            includeContent: false
+            omitContent: true
         )
 
         #expect(!hits.isEmpty)
@@ -50,7 +50,7 @@ struct VectorSearchClientIntegrationTests {
             frameworks: [],
             kinds: ["  article  ", "", "   "],
             limit: 5,
-            includeContent: false
+            omitContent: true
         )
 
         #expect(!hits.isEmpty)
@@ -58,7 +58,7 @@ struct VectorSearchClientIntegrationTests {
     }
 
     @Test
-    func includeContentControlsWhetherSearchResultsContainContent() async throws {
+    func omitContentControlsWhetherSearchResultsContainContent() async throws {
         let client = try makeClient()
         let vector = try await LiveEnvironment.embeddingVector(for: "swiftui color")
         let hitsWithoutContent = try client.search(
@@ -66,15 +66,9 @@ struct VectorSearchClientIntegrationTests {
             frameworks: [],
             kinds: [],
             limit: 5,
-            includeContent: false
+            omitContent: true
         )
-        let hitsWithContent = try client.search(
-            vector: vector,
-            frameworks: [],
-            kinds: [],
-            limit: 5,
-            includeContent: true
-        )
+        let hitsWithContent = try client.search(vector: vector, frameworks: [], kinds: [], limit: 5, omitContent: false)
 
         #expect(hitsWithoutContent.allSatisfy { $0.content == nil })
         #expect(hitsWithContent.contains { !(($0.content ?? "").isEmpty) })
@@ -88,7 +82,7 @@ struct VectorSearchClientIntegrationTests {
             frameworks: [LiveEnvironment.searchFramework],
             kinds: ["article"],
             limit: 0,
-            includeContent: false
+            omitContent: true
         )
 
         #expect(hits.isEmpty)

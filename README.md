@@ -53,8 +53,8 @@ let searchResults = try await client.search(
     "swift testing",
     frameworks: ["Swift Testing"],
     kinds: [.article],
-    maxResults: 5,
-    includeContent: true
+    limit: 5,
+    omitContent: false
 )
 
 let fetchResult = try client.fetch(

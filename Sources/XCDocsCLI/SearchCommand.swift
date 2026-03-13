@@ -40,8 +40,8 @@ struct SearchCommand: AsyncParsableCommand {
             queryParts.joined(separator: " "),
             frameworks: frameworks,
             kinds: kinds,
-            maxResults: limit,
-            includeContent: !omitContent
+            limit: limit,
+            omitContent: omitContent
         )
 
         if json {
