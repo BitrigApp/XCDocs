@@ -29,6 +29,10 @@ func renderTextEntry(_ entry: DocumentationEntry, score: Double? = nil, index: I
 
     var lines = [renderBold(headline, enabled: supportsStyling)]
 
+    if let framework = entry.framework {
+        lines.append("\(indentation)\(renderBold("Framework:", enabled: supportsStyling)) \(framework)")
+    }
+
     if let kind = entry.kind?.rawValue {
         lines.append("\(indentation)\(renderBold("Kind:", enabled: supportsStyling)) \(kind)")
     }
