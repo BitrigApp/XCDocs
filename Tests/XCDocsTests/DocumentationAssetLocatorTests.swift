@@ -76,9 +76,7 @@ struct DocumentationAssetLocatorTests {
         } catch {
             let nsError = error as NSError
             #expect(nsError.domain == NSCocoaErrorDomain)
-            #expect(
-                nsError.code == NSFileReadNoPermissionError || nsError.code == NSFileWriteNoPermissionError
-            )
+            #expect(nsError.code == NSFileReadNoPermissionError || nsError.code == NSFileWriteNoPermissionError)
         }
     }
 

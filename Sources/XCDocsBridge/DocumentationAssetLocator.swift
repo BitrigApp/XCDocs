@@ -17,13 +17,8 @@ package struct DocumentationAssetLocator {
     package func locateDatabaseDirectoryURL() throws -> URL {
         let contents = try assetRootContents()
 
-        let candidates = try contents
-            .filter { $0.pathExtension == "asset" }
-            .filter { try hasReadableIndex(at: $0) }
-            .sorted {
-            lhs,
-            rhs in modificationDate(for: lhs) > modificationDate(for: rhs)
-        }
+        let candidates = try contents.filter { $0.pathExtension == "asset" }.filter { try hasReadableIndex(at: $0) }
+            .sorted { lhs, rhs in modificationDate(for: lhs) > modificationDate(for: rhs) }
 
         guard let assetURL = candidates.first else {
             throw BridgeError(
