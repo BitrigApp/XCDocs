@@ -62,10 +62,10 @@ private func printDocumentationSearchJSON(_ results: [SearchResult]) throws {
         let uri: String
 
         init(searchResult: SearchResult) {
-            self.contents = searchResult.content ?? ""
+            self.contents = searchResult.entry.content ?? ""
             self.score = searchResult.score
-            self.title = searchResult.title ?? ""
-            self.uri = searchResult.identifier
+            self.title = searchResult.entry.title ?? ""
+            self.uri = searchResult.entry.id
         }
     }
 

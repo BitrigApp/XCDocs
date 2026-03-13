@@ -23,9 +23,21 @@ struct ModelTests {
     }
 
     @Test
-    func fetchResultHandlesEmptyAndSpecialCharacterFields() throws {
+    func documentationEntryHandlesEmptyAndSpecialCharacterFields() throws {
         guard #available(macOS 26, *) else { return }
-        try fetchResultWithEmptyAndSpecialFields()
+        try documentationEntryWithEmptyAndSpecialFields()
+    }
+
+    @Test
+    func searchResultEncodesEntryWithoutDuplicatingEntryFields() throws {
+        guard #available(macOS 26, *) else { return }
+        try searchResultEncodesNestedEntryShape()
+    }
+
+    @Test
+    func publicModelsExposeStableIdentities() throws {
+        guard #available(macOS 26, *) else { return }
+        assertStableIdentities()
     }
 }
 
@@ -34,17 +46,19 @@ private func publicModelsRoundTripThroughCodableOnSupportedOS() throws {
     try assertRoundTrip(DocumentationKind.article)
     try assertRoundTrip(
         SearchResult(
-            identifier: "/documentation/Testing",
             score: 0.75,
-            framework: "Swift Testing",
-            kind: .article,
-            title: "Swift Testing",
-            content: "Create and run tests."
+            entry: DocumentationEntry(
+                id: "/documentation/Testing",
+                framework: "Swift Testing",
+                kind: .article,
+                title: "Swift Testing",
+                content: "Create and run tests."
+            )
         )
     )
     try assertRoundTrip(
-        FetchResult(
-            identifier: "/documentation/Testing",
+        DocumentationEntry(
+            id: "/documentation/Testing",
             framework: "Swift Testing",
             kind: .article,
             title: "Swift Testing",
@@ -60,13 +74,31 @@ private func allDocumentationKindCasesRoundTrip() throws {
 
 @available(macOS 26, *)
 private func searchResultWithEmptyAndSpecialFields() throws {
-    try assertRoundTrip(SearchResult(identifier: "", score: 0.0, framework: nil, kind: nil, title: nil, content: nil))
+    try assertRoundTrip(
+        SearchResult(score: 0.0, entry: DocumentationEntry(id: "", framework: nil, kind: nil, title: nil, content: nil))
+    )
     try assertRoundTrip(
         SearchResult(
-            identifier: "/docs/special/<chars>&\"quotes\"",
             score: -1.0,
+            entry: DocumentationEntry(
+                id: "/docs/special/<chars>&\"quotes\"",
+                framework: "",
+                kind: .symbol,
+                title: "Title with emoji \u{1F600} and newline\n",
+                content: "Content with tabs\tand unicode \u{00E9}\u{00F1}"
+            )
+        )
+    )
+}
+
+@available(macOS 26, *)
+private func documentationEntryWithEmptyAndSpecialFields() throws {
+    try assertRoundTrip(DocumentationEntry(id: "", framework: nil, kind: nil, title: nil, content: nil))
+    try assertRoundTrip(
+        DocumentationEntry(
+            id: "/docs/special/<chars>&\"quotes\"",
             framework: "",
-            kind: .symbol,
+            kind: .topic,
             title: "Title with emoji \u{1F600} and newline\n",
             content: "Content with tabs\tand unicode \u{00E9}\u{00F1}"
         )
@@ -74,17 +106,45 @@ private func searchResultWithEmptyAndSpecialFields() throws {
 }
 
 @available(macOS 26, *)
-private func fetchResultWithEmptyAndSpecialFields() throws {
-    try assertRoundTrip(FetchResult(identifier: "", framework: nil, kind: nil, title: nil, content: nil))
-    try assertRoundTrip(
-        FetchResult(
-            identifier: "/docs/special/<chars>&\"quotes\"",
-            framework: "",
-            kind: .topic,
-            title: "Title with emoji \u{1F600} and newline\n",
-            content: "Content with tabs\tand unicode \u{00E9}\u{00F1}"
+private func searchResultEncodesNestedEntryShape() throws {
+    let result = SearchResult(
+        score: 0.75,
+        entry: DocumentationEntry(
+            id: "/documentation/Testing",
+            framework: "Swift Testing",
+            kind: .article,
+            title: "Swift Testing",
+            content: "Create and run tests."
         )
     )
+
+    let data = try JSONEncoder().encode(result)
+    let jsonObject = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+
+    #expect(jsonObject["score"] as? NSNumber == 0.75)
+    #expect(jsonObject["entry"] as? [String: Any] != nil)
+    #expect(jsonObject["identifier"] == nil)
+    #expect((jsonObject["entry"] as? [String: Any])?["id"] as? String == "/documentation/Testing")
+    #expect((jsonObject["entry"] as? [String: Any])?["identifier"] == nil)
+    #expect(jsonObject["framework"] == nil)
+    #expect(jsonObject["kind"] == nil)
+    #expect(jsonObject["title"] == nil)
+    #expect(jsonObject["content"] == nil)
+}
+
+@available(macOS 26, *)
+private func assertStableIdentities() {
+    let entry = DocumentationEntry(
+        id: "/documentation/Testing",
+        framework: "Swift Testing",
+        kind: .article,
+        title: "Swift Testing",
+        content: "Create and run tests."
+    )
+    let result = SearchResult(score: 0.75, entry: entry)
+
+    #expect(entry.id == "/documentation/Testing")
+    #expect(result.id == entry.id)
 }
 
 private func assertRoundTrip<T: Codable & Equatable>(_ value: T) throws {

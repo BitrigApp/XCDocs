@@ -51,12 +51,14 @@ public final class Client {
 
         return hits.map {
             SearchResult(
-                identifier: $0.identifier,
                 score: $0.score,
-                framework: $0.framework,
-                kind: $0.type.flatMap(DocumentationKind.init(rawValue:)),
-                title: $0.title,
-                content: $0.content
+                entry: DocumentationEntry(
+                    id: $0.identifier,
+                    framework: $0.framework,
+                    kind: $0.type.flatMap(DocumentationKind.init(rawValue:)),
+                    title: $0.title,
+                    content: $0.content
+                )
             )
         }
     }
@@ -71,15 +73,15 @@ public final class Client {
     /// - Returns: The resolved documentation entry.
     /// - Throws: An error if the documentation asset cannot be found, if the identifier does
     ///   not exist, or if the underlying storage backend fails to load the entry.
-    public func fetch(_ identifier: String) async throws -> FetchResult {
+    public func fetch(_ identifier: String) async throws -> DocumentationEntry {
         let databaseDirectoryURL = try DocumentationAssetLocator().locateDatabaseDirectoryURL()
 
         let searchClient = try await VectorSearchClient(databaseDirectoryURL: databaseDirectoryURL, readOnly: true)
 
         let result = try await searchClient.fetch(identifier: identifier)
 
-        return FetchResult(
-            identifier: result.identifier,
+        return DocumentationEntry(
+            id: result.identifier,
             framework: result.framework,
             kind: result.type.flatMap(DocumentationKind.init(rawValue:)),
             title: result.title,

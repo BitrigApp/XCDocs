@@ -63,7 +63,7 @@ struct ExecutableLiveIntegrationTests {
         let json = try dictionaryJSON(from: result.stdout)
 
         #expect(result.exitStatus == 0)
-        #expect(json["identifier"] as? String == LiveEnvironment.documentationIdentifier)
+        #expect(json["id"] as? String == LiveEnvironment.documentationIdentifier)
         #expect(json["framework"] as? String == LiveEnvironment.searchFramework)
         #expect(json["title"] as? String != nil)
     }

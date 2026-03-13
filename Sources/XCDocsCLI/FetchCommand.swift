@@ -29,8 +29,8 @@ struct FetchCommand: AsyncParsableCommand {
 }
 
 @available(macOS 26, *)
-private func printFetchResult(_ result: FetchResult) {
-    print(result.identifier)
+private func printFetchResult(_ result: DocumentationEntry) {
+    print(result.id)
 
     let metadata = [result.framework, result.kind?.rawValue, result.title].compactMap { $0 }.joined(separator: " | ")
     if !metadata.isEmpty { print(metadata) }

@@ -16,14 +16,13 @@ func printJSON<T: Encodable>(_ value: T, prettyPrinted: Bool = true) throws {
 func printSearchResults(_ results: [SearchResult]) {
     for (index, result) in results.enumerated() {
         let renderedScore = result.score.isFinite ? String(format: "%.4f", result.score) : "nan"
-        print("\(index + 1). [\(renderedScore)] \(result.identifier)")
+        print("\(index + 1). [\(renderedScore)] \(result.entry.id)")
 
-        let metadata = [result.framework, result.kind?.rawValue, result.title].compactMap { $0 }.joined(
-            separator: " | "
-        )
+        let metadata = [result.entry.framework, result.entry.kind?.rawValue, result.entry.title].compactMap { $0 }
+            .joined(separator: " | ")
         if !metadata.isEmpty { print("   \(metadata)") }
 
-        if let content = result.content, !content.isEmpty {
+        if let content = result.entry.content, !content.isEmpty {
             let singleLineContent = content.replacingOccurrences(of: "\n", with: " ").trimmingCharacters(
                 in: .whitespacesAndNewlines
             )
