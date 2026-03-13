@@ -1,12 +1,12 @@
 # XCDocs
 
+<img src="demo.gif" alt="Demo of the xcdocs CLI" width="720">
+
 **XCDocs** is a Swift package and CLI for Apple's developer documentation.
 
 It exposes the same data and functionality which powers Xcode's MCP tool, called `DocumentationSearch`.
 
 The `xcdocs` CLI is designed for use by agents, like Bitrig's agent, Codex, or Claude Code.
-
-![Demo of the xcdocs CLI](demo.gif)
 
 ## Availability
 
