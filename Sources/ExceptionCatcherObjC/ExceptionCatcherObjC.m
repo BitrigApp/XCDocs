@@ -1,7 +1,3 @@
-#if !defined(__arm64__)
-#error XCDocs requires arm64.
-#endif
-
 #import "ExceptionCatcherObjC.h"
 
 NSError * _Nullable XCDocsCatchException(void (NS_NOESCAPE ^work)(void)) {
