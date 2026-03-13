@@ -19,6 +19,9 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   swiftfmt:
     name: Swift Format
@@ -27,10 +30,10 @@ jobs:
       SWIFT_VERSION: "6.2"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
 
       - name: Cache Swift Toolchain
-        uses: actions/cache@v4
+        uses: actions/cache@v5.0.3
         with:
           path: ${{ runner.tool_cache }}/swift-Ubuntu/${{ env.SWIFT_VERSION }}*/*
           key: ${{ runner.os }}-${{ runner.arch }}-swift-toolchain-${{ env.SWIFT_VERSION }}
@@ -38,7 +41,7 @@ jobs:
             ${{ runner.os }}-${{ runner.arch }}-swift-toolchain-
 
       - name: Setup Swift
-        uses: swift-actions/setup-swift@v2
+        uses: swift-actions/setup-swift@v2.4.0
         with:
           swift-version: ${{ env.SWIFT_VERSION }}
 
