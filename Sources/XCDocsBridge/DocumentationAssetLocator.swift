@@ -18,7 +18,7 @@ package struct DocumentationAssetLocator {
         let contents = try assetRootContents()
 
         let candidates = try contents.filter { $0.pathExtension == "asset" }.filter { try hasReadableIndex(at: $0) }
-            .sorted { lhs, rhs in modificationDate(for: lhs) > modificationDate(for: rhs) }
+            .sorted { lhs, rhs in try modificationDate(for: lhs) > modificationDate(for: rhs) }
 
         guard let assetURL = candidates.first else {
             throw BridgeError(
@@ -98,8 +98,8 @@ package struct DocumentationAssetLocator {
         return nsError.code == NSFileNoSuchFileError || nsError.code == NSFileReadNoSuchFileError
     }
 
-    private func modificationDate(for url: URL) -> Date {
-        let resourceValues = try? url.resourceValues(forKeys: [.contentModificationDateKey])
-        return resourceValues?.contentModificationDate ?? .distantPast
+    package func modificationDate(for url: URL) throws -> Date {
+        let resourceValues = try url.resourceValues(forKeys: [.contentModificationDateKey])
+        return resourceValues.contentModificationDate ?? .distantPast
     }
 }
