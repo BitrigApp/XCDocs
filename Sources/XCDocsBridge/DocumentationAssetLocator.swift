@@ -17,10 +17,10 @@ package struct DocumentationAssetLocator {
     package func locateDatabaseDirectoryURL() throws -> URL {
         let contents = try assetRootContents()
 
-        let candidates = contents
-            .filter { $0.pathExtension == "asset" }
-            .filter { hasReadableIndex(at: $0) }
-            .sorted { lhs, rhs in modificationDate(for: lhs) > modificationDate(for: rhs) }
+        let candidates = contents.filter { $0.pathExtension == "asset" }.filter { hasReadableIndex(at: $0) }.sorted {
+            lhs,
+            rhs in modificationDate(for: lhs) > modificationDate(for: rhs)
+        }
 
         guard let assetURL = candidates.first else {
             throw BridgeError(
@@ -36,9 +36,7 @@ package struct DocumentationAssetLocator {
         let assetDataURL = assetURL.appendingPathComponent("AssetData", isDirectory: true)
         let databaseDirectoryURL = assetDataURL.appendingPathComponent("documentation-db", isDirectory: true)
         let indexURL = indexURL(forAssetURL: assetURL)
-        do {
-            try openAndCloseFile(at: indexURL)
-        } catch {
+        do { try openAndCloseFile(at: indexURL) } catch {
             if isMissingFileError(error) {
                 throw BridgeError(
                     .assetNotFound,
@@ -81,9 +79,10 @@ package struct DocumentationAssetLocator {
     }
 
     private func indexURL(forAssetURL assetURL: URL) -> URL {
-        assetURL.appendingPathComponent("AssetData", isDirectory: true)
-            .appendingPathComponent("documentation-db", isDirectory: true)
-            .appendingPathComponent("index.sql")
+        assetURL.appendingPathComponent("AssetData", isDirectory: true).appendingPathComponent(
+            "documentation-db",
+            isDirectory: true
+        ).appendingPathComponent("index.sql")
     }
 
     private func openAndCloseFile(at url: URL) throws {

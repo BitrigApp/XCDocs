@@ -206,7 +206,5 @@ private final class StubFileManager: FileManager {
         at url: URL,
         includingPropertiesForKeys keys: [URLResourceKey]?,
         options mask: DirectoryEnumerationOptions = []
-    ) throws -> [URL] {
-        throw contentsOfDirectoryError
-    }
+    ) throws -> [URL] { throw contentsOfDirectoryError }
 }
