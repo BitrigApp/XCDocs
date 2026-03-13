@@ -22,7 +22,7 @@ Ask your agent to help!
 
 #### Recommended
 
-Download the CLI from [Releases](releases) and put it in `/usr/local/bin`.
+Download the CLI from [Releases](https://github.com/BitrigApp/XCDocs/tags) and put it in `/usr/local/bin`.
 
 #### Alternative
 
