@@ -43,6 +43,43 @@ struct PrivateObjectTests {
         #expect(instanceMethod(fixture, instanceSelector)?.intValue == 42)
         #expect(classMethod(KeyValueFixture.self, classSelector)?.intValue == 7)
     }
+
+    @Test
+    func returnsNilForNonExistentSelector() {
+        let fixture = KeyValueFixture()
+        let wrapper = FixtureWrapper(base: fixture)
+        let bogusSelector = NSSelectorFromString("totallyBogusMethod")
+
+        let result = wrapper.objcInstanceMethod(selector: bogusSelector, as: NumberGetter.self)
+        #expect(result == nil)
+    }
+
+    @Test
+    func returnsNilForNonExistentClassSelector() {
+        let bogusSelector = NSSelectorFromString("totallyBogusClassMethod")
+
+        let result = FixtureWrapper.objcClassMethod(KeyValueFixture.self, selector: bogusSelector, as: ClassNumberGetter.self)
+        #expect(result == nil)
+    }
+
+    @Test
+    func returnsNilWhenTargetTypeSizeDoesNotMatchIMP() {
+        let fixture = KeyValueFixture()
+        let wrapper = FixtureWrapper(base: fixture)
+        let selector = NSSelectorFromString("answer")
+
+        // OversizedType is larger than a pointer, so the cast should be rejected.
+        let result = wrapper.objcInstanceMethod(selector: selector, as: OversizedType.self)
+        #expect(result == nil)
+    }
+
+    @Test
+    func returnsNilWhenClassMethodTargetTypeSizeDoesNotMatchIMP() {
+        let selector = NSSelectorFromString("classAnswer")
+
+        let result = FixtureWrapper.objcClassMethod(KeyValueFixture.self, selector: selector, as: OversizedType.self)
+        #expect(result == nil)
+    }
 }
 
 private struct FixtureWrapper: PrivateObject { let base: AnyObject }
@@ -60,3 +97,11 @@ private final class KeyValueFixture: NSObject {
 
 private typealias NumberGetter = @convention(c) (AnyObject, Selector) -> NSNumber?
 private typealias ClassNumberGetter = @convention(c) (AnyClass, Selector) -> NSNumber?
+
+/// A type whose size exceeds that of a function pointer, used to verify that
+/// `validatedCast` rejects size-mismatched bit casts.
+private struct OversizedType {
+    let a: UInt64
+    let b: UInt64
+    let c: UInt64
+}

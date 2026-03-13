@@ -8,4 +8,5 @@ package enum BridgeErrorCode: String, Sendable {
     case operationFailed
     case searchFailed
     case timeout
+    case typeMismatch
 }
