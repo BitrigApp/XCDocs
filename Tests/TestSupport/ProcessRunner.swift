@@ -1,22 +1,12 @@
 import Foundation
-import Subprocess
-
-#if canImport(System)
-import System
-#else
-import SystemPackage
-#endif
 
 package struct ProcessResult: Sendable {
-    package let terminationStatus: TerminationStatus
+    package let terminationStatus: Int32
     package let stdout: String
     package let stderr: String
 
     package var exitStatus: Int32 {
-        switch terminationStatus {
-        case .exited(let code): return code
-        case .unhandledException(let code): return code
-        }
+        terminationStatus
     }
 
     package var combinedOutput: String { stdout + stderr }
@@ -25,18 +15,23 @@ package struct ProcessResult: Sendable {
 package enum ProcessRunner {
     package static func runXCDocs(_ arguments: [String]) async throws -> ProcessResult {
         let executableURL = try xcdocsExecutableURL()
-        let result = try await run(
-            .path(FilePath(executableURL.path)),
-            arguments: Arguments(arguments),
-            workingDirectory: FilePath(packageRootURL.path),
-            output: .string(limit: 1 << 20),
-            error: .string(limit: 1 << 20)
-        )
+        let process = Process()
+        process.executableURL = executableURL
+        process.arguments = arguments
+        process.currentDirectoryURL = packageRootURL
+
+        let stdout = Pipe()
+        let stderr = Pipe()
+        process.standardOutput = stdout
+        process.standardError = stderr
+
+        try process.run()
+        process.waitUntilExit()
 
         return ProcessResult(
-            terminationStatus: result.terminationStatus,
-            stdout: result.standardOutput ?? "",
-            stderr: result.standardError ?? ""
+            terminationStatus: process.terminationStatus,
+            stdout: String(data: stdout.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? "",
+            stderr: String(data: stderr.fileHandleForReading.readDataToEndOfFile(), encoding: .utf8) ?? ""
         )
     }
 

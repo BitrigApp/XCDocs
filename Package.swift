@@ -23,10 +23,6 @@ let package = Package(
             url: "https://github.com/apple/swift-argument-parser.git",
             from: "1.2.0"
         ),
-        .package(
-            url: "https://github.com/swiftlang/swift-subprocess.git",
-            from: "0.3.0"
-        ),
     ],
     targets: [
         .target(
@@ -90,10 +86,6 @@ let package = Package(
             dependencies: [
                 "XCDocsBridge",
                 "XCDocsSupport",
-                .product(
-                    name: "Subprocess",
-                    package: "swift-subprocess"
-                ),
             ],
             path: "Tests/TestSupport",
             swiftSettings: [
