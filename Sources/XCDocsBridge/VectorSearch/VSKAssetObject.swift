@@ -4,6 +4,7 @@ package struct VSKAssetObject: PrivateObject {
     enum Key: String {
         case identifier = "stringIdentifier"
         case attributes
+        case payload
     }
 
     let base: AnyObject
@@ -11,6 +12,8 @@ package struct VSKAssetObject: PrivateObject {
     init(base: AnyObject) { self.base = base }
 
     package var identifier: String { value(forKey: .identifier, as: String.self, default: "") }
+
+    package var payload: Data? { value(forKey: .payload, as: Data.self) }
 
     package var attributes: [String: String] {
         guard let attributeDictionary = value(forKey: .attributes, as: NSDictionary.self) else { return [:] }

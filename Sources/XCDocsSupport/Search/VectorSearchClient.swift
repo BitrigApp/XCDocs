@@ -82,10 +82,14 @@ package final class VectorSearchClient {
             includeVectors: false,
             selectedAttributes: selectedAttributes
         )
-        let hit = VectorSearchHit(identifier: await asset.identifier, score: .nan, attributes: await asset.attributes)
+        let hit = VectorSearchHit(
+            identifier: await asset.identifier,
+            score: .nan,
+            attributes: await attributes(of: asset, includingContent: true)
+        )
 
-        let descendantsByParent = try await descendantIdentifiersByParent(forParentIdentifiers: [identifier])
-        guard descendantsByParent[identifier] != nil else { return hit }
+        let descendantsByParent = try await descendantIdentifiersByParent(in: [hit])
+        guard descendantsByParent[hit.identifier] != nil else { return hit }
         let expandedHits = try await appendDescendantContents(
             to: [hit],
             descendantsByParent: descendantsByParent,
@@ -115,9 +119,7 @@ package final class VectorSearchClient {
     private func hydrateSearchHits(_ hits: [VectorSearchHit], selectedAttributes: [VSKAttributeObject]) async throws
         -> [VectorSearchHit]
     {
-        var attributeNames: [String] = []
-        attributeNames.reserveCapacity(selectedAttributes.count)
-        for attribute in selectedAttributes { attributeNames.append(await attribute.name) }
+        let attributeNames = await names(of: selectedAttributes)
         let incompleteIdentifiers = Array(
             Set(
                 hits.filter { hit in
@@ -137,10 +139,11 @@ package final class VectorSearchClient {
             includeVectors: false,
             selectedAttributes: selectedAttributes
         )
+        let includesContent = attributeNames.contains("content")
         var attributesByIdentifier: [String: [String: String]] = [:]
         for asset in hydratedAssets {
             let identifier = await asset.identifier
-            let attributes = await asset.attributes
+            let attributes = await attributes(of: asset, includingContent: includesContent)
             attributesByIdentifier[identifier] = attributes.merging(attributesByIdentifier[identifier] ?? [:]) {
                 hydratedValue,
                 existingValue in existingValue.isEmpty ? hydratedValue : existingValue
@@ -169,11 +172,12 @@ package final class VectorSearchClient {
             includeVectors: false,
             selectedAttributes: selectedAttributes
         )
+        let includesContent = await names(of: selectedAttributes).contains("content")
         var hitsByIdentifier: [String: VectorSearchHit] = [:]
         hitsByIdentifier.reserveCapacity(assets.count)
         for asset in assets {
             let identifier = await asset.identifier
-            let attributes = await asset.attributes
+            let attributes = await attributes(of: asset, includingContent: includesContent)
             hitsByIdentifier[identifier] = VectorSearchHit(identifier: identifier, score: .nan, attributes: attributes)
         }
 
@@ -188,37 +192,36 @@ package final class VectorSearchClient {
     }
 
     private func descendantIdentifiersByParent(in hits: [VectorSearchHit]) async throws -> [String: [String]] {
-        try await descendantIdentifiersByParent(
-            forParentIdentifiers: hits.map(\.identifier).filter { !$0.contains("#") }
-        )
-    }
-
-    private func descendantIdentifiersByParent(forParentIdentifiers identifiers: [String]) async throws -> [String:
-        [String]]
-    {
-        let parentIdentifiers = orderedUniqueIdentifiers(from: identifiers.filter { !$0.contains("#") })
+        let parents = hits.filter { !$0.identifier.contains("#") }
+        let parentIdentifiers = orderedUniqueIdentifiers(from: parents.map(\.identifier))
         guard !parentIdentifiers.isEmpty else { return [:] }
 
-        let topicIdentifiers = try await topicIdentifiers()
-        guard !topicIdentifiers.isEmpty else { return [:] }
+        // Sections share their page's framework, so a page without one leaves no framework to narrow the lookup by.
+        let frameworks = parents.contains { ($0.framework ?? "").isEmpty } ? [] : parents.compactMap(\.framework)
+        let sectionIdentifiers = try await sectionIdentifiers(inFrameworks: Array(Set(frameworks)))
+        guard !sectionIdentifiers.isEmpty else { return [:] }
 
         var descendantsByParent: [String: [String]] = [:]
         descendantsByParent.reserveCapacity(parentIdentifiers.count)
         for parentIdentifier in parentIdentifiers {
             let descendantPrefix = "\(parentIdentifier)#"
-            let descendants = topicIdentifiers.filter { $0.hasPrefix(descendantPrefix) }
+            let descendants = sectionIdentifiers.filter { $0.hasPrefix(descendantPrefix) }
             if !descendants.isEmpty { descendantsByParent[parentIdentifier] = descendants }
         }
 
         return descendantsByParent
     }
 
-    private func topicIdentifiers() async throws -> [String] {
-        orderedUniqueIdentifiers(
-            from: try await client.stringIdentifiers(
-                applying: try await makeFilters(attributeName: "type", values: ["topic"])
-            )
+    /// Returns the identifiers of the page sections in the given frameworks, or in all frameworks if none are given,
+    /// in document order.
+    ///
+    /// Older documentation assets store only topic groups as separate `page#section` entries. Assets built for
+    /// Xcode 27 split every page into sections, typed like the page itself, and keep only the overview on the page.
+    private func sectionIdentifiers(inFrameworks frameworks: [String]) async throws -> [String] {
+        let identifiers = try await client.stringIdentifiers(
+            applying: try await makeFilters(attributeName: "framework", values: frameworks)
         )
+        return orderedUniqueIdentifiers(from: identifiers.filter { $0.contains("#") })
     }
 
     private func appendDescendantContents(
@@ -274,6 +277,28 @@ package final class VectorSearchClient {
         ]
     }
 
+    /// Returns an asset's attributes, taking `content` from the asset's payload when the attribute is empty.
+    ///
+    /// Documentation assets built for Xcode 27 leave the `content` attribute empty and store each page's text in a
+    /// JSON payload instead.
+    private func attributes(of asset: VSKAssetObject, includingContent includesContent: Bool) async -> [String: String]
+    {
+        var attributes = await asset.attributes
+        guard includesContent, attributes["content"]?.isEmpty ?? true, let payload = await asset.payload,
+            let content = try? JSONDecoder().decode(DocumentPayload.self, from: payload).content
+        else { return attributes }
+
+        attributes["content"] = content
+        return attributes
+    }
+
+    private func names(of attributes: [VSKAttributeObject]) async -> [String] {
+        var names: [String] = []
+        names.reserveCapacity(attributes.count)
+        for attribute in attributes { names.append(await attribute.name) }
+        return names
+    }
+
     private func missingEntryError(for identifier: String) -> NSError {
         NSError(
             domain: "XCDocsSupport.VectorSearchClient",
@@ -292,3 +317,6 @@ package final class VectorSearchClient {
         return uniqueIdentifiers
     }
 }
+
+/// The JSON document a documentation asset stores as its payload.
+private struct DocumentPayload: Decodable { let content: String? }

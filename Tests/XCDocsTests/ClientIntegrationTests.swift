@@ -38,15 +38,21 @@ struct ClientIntegrationTests {
     }
 
     @Test
-    func entryAppendsSubtopicContentForCollectionGroupArticles() async throws {
+    func entryAppendsSectionContentForSymbols() async throws {
         guard #available(macOS 26, *) else { return }
-        try await entryAppendsSubtopicContentForCollectionGroupArticlesOnSupportedOS()
+        try await entryAppendsSectionContentForSymbolsOnSupportedOS()
     }
 
     @Test
-    func searchDoesNotReturnArticleSubtopicsSeparatelyWhenParentArticleIsPresent() async throws {
+    func entryAppendsSectionContentForArticles() async throws {
         guard #available(macOS 26, *) else { return }
-        try await searchDoesNotReturnArticleSubtopicsSeparatelyWhenParentArticleIsPresentOnSupportedOS()
+        try await entryAppendsSectionContentForArticlesOnSupportedOS()
+    }
+
+    @Test
+    func searchDoesNotReturnArticleSectionsSeparatelyWhenParentArticleIsPresent() async throws {
+        guard #available(macOS 26, *) else { return }
+        try await searchDoesNotReturnArticleSectionsSeparatelyWhenParentArticleIsPresentOnSupportedOS()
     }
 
     @Test
@@ -108,29 +114,42 @@ private func entryReturnsExpectedMetadataAndContentOnSupportedOS() async throws 
 }
 
 @available(macOS 26, *)
-private func entryAppendsSubtopicContentForCollectionGroupArticlesOnSupportedOS() async throws {
+private func entryAppendsSectionContentForSymbolsOnSupportedOS() async throws {
     let client = Client()
-    let result = try await client.entry(for: LiveEnvironment.articleWithSubtopicsIdentifier)
+    let result = try await client.entry(for: "/documentation/SwiftUI/Color")
     let content = try #require(result.content)
 
-    #expect(content.contains("Learn how to design and develop beautiful interfaces that leverage Liquid Glass."))
-    #expect(content.contains("Liquid Glass: Introduction to Liquid Glass"))
-    #expect(content.contains("Liquid Glass: Adopting Liquid Glass"))
-    #expect(content.contains("Liquid Glass: Essentials"))
+    #expect(content.contains("A representation of a color that adapts to a given context."))
+    #expect(content.contains("Color: Creating a color"))
+    #expect(content.contains("Color: Getting standard colors"))
 }
 
 @available(macOS 26, *)
-private func searchDoesNotReturnArticleSubtopicsSeparatelyWhenParentArticleIsPresentOnSupportedOS() async throws {
+private func entryAppendsSectionContentForArticlesOnSupportedOS() async throws {
     let client = Client()
-    let results = try await client.search(LiveEnvironment.articleWithSubtopicsQuery, limit: 10, omitContent: false)
-    let articleResult = try #require(results.first { $0.entry.id == LiveEnvironment.articleWithSubtopicsIdentifier })
+    let result = try await client.entry(for: LiveEnvironment.articleWithSectionsIdentifier)
+    let content = try #require(result.content)
+
+    #expect(content.contains("Configure, combine, and morph views using Liquid Glass effects."))
+    #expect(content.contains("Applying Liquid Glass to custom views: Apply and configure Liquid Glass effects"))
+    #expect(
+        content.contains("Applying Liquid Glass to custom views: Combine multiple views with Liquid Glass containers")
+    )
+    #expect(content.contains("Applying Liquid Glass to custom views: Morph Liquid Glass effects during transitions"))
+}
+
+@available(macOS 26, *)
+private func searchDoesNotReturnArticleSectionsSeparatelyWhenParentArticleIsPresentOnSupportedOS() async throws {
+    let client = Client()
+    let results = try await client.search(LiveEnvironment.articleWithSectionsQuery, limit: 10, omitContent: false)
+    let articleResult = try #require(results.first { $0.entry.id == LiveEnvironment.articleWithSectionsIdentifier })
     let articleContent = try #require(articleResult.entry.content)
 
-    #expect(articleContent.contains("Liquid Glass: Introduction to Liquid Glass"))
+    #expect(articleContent.contains("Applying Liquid Glass to custom views: Apply and configure Liquid Glass effects"))
     #expect(
         results.allSatisfy { result in
-            result.entry.id == LiveEnvironment.articleWithSubtopicsIdentifier
-                || !result.entry.id.hasPrefix("\(LiveEnvironment.articleWithSubtopicsIdentifier)#")
+            result.entry.id == LiveEnvironment.articleWithSectionsIdentifier
+                || !result.entry.id.hasPrefix("\(LiveEnvironment.articleWithSectionsIdentifier)#")
         }
     )
 }
