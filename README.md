@@ -2,11 +2,13 @@
 
 <img src="demo.gif" alt="Demo of the xcdocs CLI" width="720">
 
-**XCDocs** is a Swift package and CLI for Apple's developer documentation.
+**XCDocs lets your agents quickly search local Apple docs without keeping Xcode open!**
 
-It exposes the same data and functionality which powers Xcode's MCP tool, called `DocumentationSearch`.
+It uses the vector database powering Xcode's `DocumentationSearch` MCP tool under the hood, which is already on your Mac.
 
-The `xcdocs` CLI is designed for use by agents, like Bitrig's agent, Codex, or Claude Code.
+Includes:
+- `xcdocs` CLI & agent skill, designed for use by agents like Codex or Claude Code
+- Swift package, to integrate `XCDocs` into other tools
 
 ## Availability
 
@@ -20,11 +22,21 @@ Ask your agent to help!
 
 #### Recommended
 
-Download the CLI from [Releases](releases) and put it in `/usr/local/bin`.
+Install with Homebrew:
+
+```bash
+brew install BitrigApp/tap/xcdocs
+```
 
 #### Alternative
 
+Download the CLI from [Releases](https://github.com/BitrigApp/XCDocs/releases) and put it in `/usr/local/bin`.
 You can also clone the repo and run `swift build` yourself. The resulting binary will be in `.build/debug/xcdocs`.
+
+## Agent Skill
+
+- Codex: Tell agent to copy/symlink `.agents/skills/xcdocs` to `~/.agents/skills/xcdocs`
+- Claude Code: Tell agent to copy/symlink `.agents/skills/xcdocs` to `~/.claude/skills/xcdocs`
 
 ## Usage
 
@@ -48,13 +60,6 @@ Get an entry by identifier:
 xcdocs get /documentation/Testing
 xcdocs get /documentation/Testing --json
 ```
-
-## Agent Skill
-
-This repository includes a standard Agent Skills bundle at [.agents/skills/xcdocs](.agents/skills/xcdocs) for agents fixing or implementing code that depends on Apple frameworks.
-
-- Codex: use the checked-in project copy in `.agents/skills/xcdocs`, or copy/symlink it to `~/.agents/skills/xcdocs`.
-- Claude Code: copy/symlink the same folder to `.claude/skills/xcdocs` for this repo or `~/.claude/skills/xcdocs` for all projects.
 
 ## Swift API
 
