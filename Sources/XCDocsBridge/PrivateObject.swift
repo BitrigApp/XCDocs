@@ -3,7 +3,7 @@ import Foundation
 enum DefaultKey: String { case key }
 
 @globalActor
-actor PrivateObjectActor { static let shared = PrivateObjectActor() }
+package actor PrivateObjectActor { package static let shared = PrivateObjectActor() }
 
 @PrivateObjectActor
 protocol PrivateObject {
