@@ -31,11 +31,11 @@ let package = Package(
             publicHeadersPath: "include"
         ),
         .target(
-            name: "ExceptionCatcher",
+            name: "XCDocsExceptionCatcher",
             dependencies: [
                 "ExceptionCatcherObjC",
             ],
-            path: "Sources/ExceptionCatcher",
+            path: "Sources/XCDocsExceptionCatcher",
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
             ]
@@ -43,7 +43,7 @@ let package = Package(
         .target(
             name: "XCDocsBridge",
             dependencies: [
-                "ExceptionCatcher",
+                "XCDocsExceptionCatcher",
             ],
             swiftSettings: [
                 .enableUpcomingFeature("StrictConcurrency"),
@@ -96,7 +96,7 @@ let package = Package(
             name: "XCDocsTests",
             dependencies: [
                 "TestSupport",
-                "ExceptionCatcher",
+                "XCDocsExceptionCatcher",
                 "ExceptionCatcherObjC",
                 "XCDocs",
                 "XCDocsBridge",
