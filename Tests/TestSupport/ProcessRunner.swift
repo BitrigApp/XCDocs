@@ -5,9 +5,7 @@ package struct ProcessResult: Sendable {
     package let stdout: String
     package let stderr: String
 
-    package var exitStatus: Int32 {
-        terminationStatus
-    }
+    package var exitStatus: Int32 { terminationStatus }
 
     package var combinedOutput: String { stdout + stderr }
 }
