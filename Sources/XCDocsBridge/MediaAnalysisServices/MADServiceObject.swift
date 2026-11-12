@@ -1,4 +1,4 @@
-import ExceptionCatcher
+import XCDocsExceptionCatcher
 import Foundation
 
 package final class MADServiceObject: PrivateObject {
