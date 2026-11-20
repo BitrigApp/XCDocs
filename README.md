@@ -25,6 +25,7 @@ Ask your agent to help!
 Install with Homebrew:
 
 ```bash
+brew trust BitrigApp/tap
 brew install BitrigApp/tap/xcdocs
 ```
 
